@@ -556,7 +556,7 @@ static void psycho_1_dump(mask power[HAN_SIZE], int *tone, int *noise) {
 */
 
 
-void psycho_1(twolame_options * glopts, short buffer[2][1152], FLOAT scale[2][SBLIMIT],
+void psycho_1(twolame_options * glopts, FLOAT bufferF[2][1152], FLOAT scale[2][SBLIMIT],
               FLOAT ltmin[2][SBLIMIT])
 {
     psycho_1_mem *mem;
@@ -608,7 +608,7 @@ void psycho_1(twolame_options * glopts, short buffer[2][1152], FLOAT scale[2][SB
         /* sami's speedup, added in 02j saves about 4% overall during an encode */
         int ok = mem->off[k] % 1408;
         for (i = 0; i < 1152; i++) {
-            fft_buf[k][ok++] = (FLOAT) buffer[k][i] / SCALE;
+            fft_buf[k][ok++] = (FLOAT) bufferF[k][i] / SCALE;
             if (ok >= 1408)
                 ok = 0;
         }

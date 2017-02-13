@@ -523,8 +523,7 @@ static void psycho_3_dump(int *tonelabel, FLOAT * Xtm, int *noiselabel, FLOAT * 
 }
 
 
-void psycho_3(twolame_options * glopts, short int buffer[2][1152], FLOAT scale[2][32],
-              FLOAT ltmin[2][32])
+void psycho_3(twolame_options * glopts, FLOAT bufferF[2][1152], FLOAT scale[2][32], FLOAT ltmin[2][32])
 {
     psycho_3_mem *mem;
     int nch = glopts->num_channels_out;
@@ -546,7 +545,7 @@ void psycho_3(twolame_options * glopts, short int buffer[2][1152], FLOAT scale[2
     for (k = 0; k < nch; k++) {
         int ok = mem->off[k] % 1408;
         for (i = 0; i < 1152; i++) {
-            mem->fft_buf[k][ok++] = (FLOAT) buffer[k][i] / SCALE;
+            mem->fft_buf[k][ok++] = (FLOAT) bufferF[k][i] / SCALE;
             if (ok >= 1408)
                 ok = 0;
         }

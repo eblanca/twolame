@@ -251,8 +251,8 @@ psycho_2_mem *psycho_2_init(twolame_options * glopts, int sfreq)
     return (mem);
 }
 
-void psycho_2(twolame_options * glopts, short int buffer[2][1152],
-              short int savebuf[2][1056], FLOAT smr[2][32])
+void psycho_2(twolame_options * glopts, FLOAT bufferF[2][1152],
+              FLOAT savebufF[2][1056], FLOAT smr[2][32])
 {
     psycho_2_mem *mem;
     unsigned int i, j, k, ch;
@@ -328,17 +328,17 @@ void psycho_2(twolame_options * glopts, short int buffer[2][1152],
 		   BLKSIZE = 1024
 	   *****************************************************************************/
             {
-                short int *bufferp = buffer[ch];
+                FLOAT *bufferpF = bufferF[ch];
                 for (j = 0; j < 480; j++) {
-                    savebuf[ch][j] = savebuf[ch][j + mem->flush];
-                    wsamp_r[j] = window[j] * ((FLOAT) savebuf[ch][j]);
+                    savebufF[ch][j] = savebufF[ch][j + mem->flush];
+                    wsamp_r[j] = window[j] * ((FLOAT) savebufF[ch][j]);
                 }
                 for (; j < 1024; j++) {
-                    savebuf[ch][j] = *bufferp++;
-                    wsamp_r[j] = window[j] * ((FLOAT) savebuf[ch][j]);
+                    savebufF[ch][j] = *bufferpF++;
+                    wsamp_r[j] = window[j] * ((FLOAT) savebufF[ch][j]);
                 }
                 for (; j < 1056; j++)
-                    savebuf[ch][j] = *bufferp++;
+                    savebufF[ch][j] = *bufferpF++;
             }
 
       /**Compute FFT****************************************************************/

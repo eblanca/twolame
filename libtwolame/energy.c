@@ -25,6 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "twolame.h"
 #include "common.h"
@@ -66,10 +67,11 @@ void do_energy_levels(twolame_options * glopts, bit_stream * bs)
        The last 5 bytes *must* be reserved for this to work correctly (otherwise you'll be
        overwriting mpeg audio data) */
 
-    short int *leftpcm = glopts->buffer[0];
-    short int *rightpcm = glopts->buffer[1];
+    FLOAT *leftpcm = glopts->bufferF[0];
+    FLOAT *rightpcm = glopts->bufferF[1];
 
-    int i, leftMax, rightMax;
+    int i;
+    FLOAT leftMax, rightMax;
     unsigned char rhibyte, rlobyte, lhibyte, llobyte;
 
     // Get the position (in butes) of the end of the mpeg audio frame
@@ -79,26 +81,26 @@ void do_energy_levels(twolame_options * glopts, bit_stream * bs)
     // find the maximum in the left and right channels
     leftMax = rightMax = -1;
     for (i = 0; i < TWOLAME_SAMPLES_PER_FRAME; i++) {
-        if (abs(leftpcm[i]) > leftMax)
-            leftMax = abs(leftpcm[i]);
-        if (abs(rightpcm[i]) > rightMax)
-            rightMax = abs(rightpcm[i]);
+        if (fabs(leftpcm[i]) > leftMax)
+            leftMax = fabs(leftpcm[i]);
+        if (fabs(rightpcm[i]) > rightMax)
+            rightMax = fabs(rightpcm[i]);
     }
 
 
 
     // fix any overflows
-    if (leftMax > 32767)
-        leftMax = 32767;
+    if (leftMax > 1.0)
+        leftMax = 1.0;
 
-    if (rightMax > 32767)
-        rightMax = 32767;
+    if (rightMax > 1.0)
+        rightMax = 1.0;
 
 
 
     // convert max value to hi/lo bytes and write into buffer
-    lhibyte = leftMax / 256;
-    llobyte = leftMax - 256 * lhibyte;
+    lhibyte = (int)(leftMax*256.0*128.0);
+    llobyte = (int)(leftMax*128.0 - 256*lhibyte);
 
     // Write the left channel into the last two bytes of the frame
     bs->buf[frameEnd - 1] = llobyte;
@@ -109,8 +111,8 @@ void do_energy_levels(twolame_options * glopts, bit_stream * bs)
     // if we're in stereo mode.
     if (glopts->mode != TWOLAME_MONO) {
 
-        rhibyte = rightMax / 256;
-        rlobyte = rightMax - 256 * rhibyte;
+        rhibyte = (int)(rightMax*256.0*128.0);
+        rlobyte = (int)(rightMax*128.0 - 256*rhibyte);
 
         bs->buf[frameEnd - 4] = rlobyte;
         bs->buf[frameEnd - 5] = rhibyte;

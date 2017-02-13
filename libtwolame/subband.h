@@ -27,7 +27,7 @@
 #define TWOLAME_SUBBAND_H
 
 int init_subband(subband_mem * smem);
-void window_filter_subband(subband_mem * smem, short *pBuffer, int ch, FLOAT s[SBLIMIT]);
+void window_filter_subband(subband_mem * smem, FLOAT *pBufferF, int ch, FLOAT s[SBLIMIT]);
 
 #endif
 
