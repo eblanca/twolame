@@ -99,8 +99,10 @@ void do_energy_levels(twolame_options * glopts, bit_stream * bs)
 
 
     // convert max value to hi/lo bytes and write into buffer
-    lhibyte = (int)(leftMax*256.0*128.0);
-    llobyte = (int)(leftMax*128.0 - 256*lhibyte);
+//    lhibyte = (int)(leftMax*256.0*128.0);
+//    llobyte = (int)(leftMax*128.0 - 256*lhibyte);
+    lhibyte = (unsigned char)((int)(leftMax*32767.0) / 256);
+    llobyte = (unsigned char)((int)(leftMax*32767.0) % 256);
 
     // Write the left channel into the last two bytes of the frame
     bs->buf[frameEnd - 1] = llobyte;
@@ -111,8 +113,10 @@ void do_energy_levels(twolame_options * glopts, bit_stream * bs)
     // if we're in stereo mode.
     if (glopts->mode != TWOLAME_MONO) {
 
-        rhibyte = (int)(rightMax*256.0*128.0);
-        rlobyte = (int)(rightMax*128.0 - 256*rhibyte);
+//        rhibyte = (int)(rightMax*256.0*128.0);
+//        rlobyte = (int)(rightMax*128.0 - 256*rhibyte);
+        rhibyte = (unsigned char)((int)(rightMax*32767.0) / 256);
+        rlobyte = (unsigned char)((int)(rightMax*32767.0) % 256);
 
         bs->buf[frameEnd - 4] = rlobyte;
         bs->buf[frameEnd - 5] = rhibyte;
