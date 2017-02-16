@@ -177,7 +177,7 @@ static void psycho_1_hann_fft_pickmax(FLOAT sample[FFT_SIZE], mask power[HAN_SIZ
         sqrt_8_over_3 = pow(8.0 / 3.0, 0.5);
         for (i = 0; i < FFT_SIZE; i++) {
             /* Hann window formula */
-            window[i] = sqrt_8_over_3 * 0.5 * (1 - cos(2.0 * PI * i / (FFT_SIZE))) / FFT_SIZE;
+            window[i] = sqrt_8_over_3 * 0.5 * (1 - cos(2.0 * PI * (FLOAT)i / (FFT_SIZE))) / FFT_SIZE;
         }
         init = 1;
     }

@@ -64,7 +64,7 @@ static psycho_0_mem *psycho_0_init(twolame_options * glopts, int sfreq)
 
     /* Find the minimum ATH in each subband */
     for (i = 0; i < 512; i++) {
-        FLOAT thisfreq = i * freqperline;
+        FLOAT thisfreq = (FLOAT)i * freqperline;
         FLOAT ath_val = ath_db(thisfreq, 0);
         if (ath_val < mem->ath_min[i >> 4])
             mem->ath_min[i >> 4] = ath_val;
@@ -115,7 +115,7 @@ void psycho_0(twolame_options * glopts, FLOAT SMR[2][SBLIMIT], unsigned int scal
        these values, but who cares? It works pretty well MFC Mar 03 */
     for (ch = 0; ch < nch; ch++)
         for (sb = 0; sb < SBLIMIT; sb++)
-            SMR[ch][sb] = 2.0 * (30.0 - minscaleindex[ch][sb]) - mem->ath_min[sb];
+            SMR[ch][sb] = 2.0 * (30.0 - (FLOAT)minscaleindex[ch][sb]) - mem->ath_min[sb];
 }
 
 

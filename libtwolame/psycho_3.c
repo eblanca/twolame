@@ -80,7 +80,7 @@ static void psycho_3_fft(FLOAT sample[BLKSIZE], FLOAT energy[BLKSIZE])
     if (!init) {                /* calculate window function for the Fourier transform */
         FLOAT sqrt_8_over_3 = pow(8.0 / 3.0, 0.5);
         for (i = 0; i < BLKSIZE; i++) {
-            window[i] = sqrt_8_over_3 * 0.5 * (1 - cos(2.0 * PI * i / (BLKSIZE))) / BLKSIZE;
+            window[i] = sqrt_8_over_3 * 0.5 * (1 - cos(2.0 * PI * (FLOAT)i / (BLKSIZE))) / BLKSIZE;
         }
         init=1;
     }
@@ -242,7 +242,7 @@ static void psycho_3_noise_label(psycho_3_mem * mem, FLOAT power[HBLKSIZE], FLOA
                    FIXME: This is just a lazy arsed arithmetic mean. Don't know if it's really going
                    to make that much difference */
                 esum += energy[j];  /* Calculate the sum of energies */
-                centreweight += (j - cbandindex[i]) * energy[j];    /* And the energy moment */
+                centreweight += (FLOAT)(j - cbandindex[i]) * energy[j];    /* And the energy moment */
             }
         }
 
@@ -428,7 +428,7 @@ static psycho_3_mem *psycho_3_init(twolame_options * glopts)
     /* For each spectral line calculate the bark and the ATH (in dB) */
     sfreq = (FLOAT) glopts->samplerate_out;
     for (i = 1; i < HBLKSIZE; i++) {
-        FLOAT freq = i * sfreq / BLKSIZE;
+        FLOAT freq = (FLOAT)i * sfreq / BLKSIZE;
         bark[i] = ath_freq2bark(freq);
         ath[i] = ath_db(freq, glopts->athlevel);
     }
@@ -463,7 +463,7 @@ static psycho_3_mem *psycho_3_init(twolame_options * glopts)
             cbval[partition[i]] += bark[i]; /* sum up all the bark values */
         for (i = 1; i < CBANDS; i++) {
             if (numlines[i] != 0)
-                cbval[i] /= numlines[i];    /* divide by the number of values */
+                cbval[i] /= (FLOAT)numlines[i];    /* divide by the number of values */
             else {
                 cbval[i] = 0;   /* this isn't a partition */
             }

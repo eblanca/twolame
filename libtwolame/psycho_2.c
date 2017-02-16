@@ -150,7 +150,7 @@ psycho_2_mem *psycho_2_init(twolame_options * glopts, int sfreq)
     /* calculate HANN window coefficients */
     /* for(i=0;i<BLKSIZE;i++)window[i]=0.5*(1-cos(2.0*PI*i/(BLKSIZE-1.0))); */
     for (i = 0; i < BLKSIZE; i++)
-        window[i] = 0.5 * (1 - cos(2.0 * PI * (i - 0.5) / BLKSIZE));
+        window[i] = 0.5 * (1 - cos(2.0 * PI * ((FLOAT)i - 0.5) / BLKSIZE));
     /* reset states used in unpredictability measure */
     for (i = 0; i < HBLKSIZE; i++) {
         mem->r[0][0][i] = mem->r[1][0][i] = mem->r[0][1][i] = mem->r[1][1][i] = 0;
@@ -173,11 +173,11 @@ psycho_2_mem *psycho_2_init(twolame_options * glopts, int sfreq)
 
     /* calculate fft frequency, then bval of each line (use fthr[] as tmp storage) */
     for (i = 0; i < HBLKSIZE; i++) {
-        temp1 = i * freq_mult;
+        temp1 = (FLOAT)i * freq_mult;
         j = 1;
         while (temp1 > crit_band[j])
             j++;
-        fthr[i] = j - 1 + (temp1 - crit_band[j - 1]) / (crit_band[j] - crit_band[j - 1]);
+        fthr[i] = (FLOAT)(j - 1) + (temp1 - crit_band[j - 1]) / (crit_band[j] - crit_band[j - 1]);
     }
     partition[0] = 0;
     /* temp2 is the counter of the number of frequency lines in each partition */
@@ -187,7 +187,7 @@ psycho_2_mem *psycho_2_init(twolame_options * glopts, int sfreq)
     for (i = 1; i < HBLKSIZE; i++) {
         if ((fthr[i] - bval_lo) > 0.33) {
             partition[i] = partition[i - 1] + 1;
-            cbval[partition[i - 1]] = cbval[partition[i - 1]] / itemp2;
+            cbval[partition[i - 1]] = cbval[partition[i - 1]] / (FLOAT)itemp2;
             cbval[partition[i]] = fthr[i];
             bval_lo = fthr[i];
             numlines[partition[i - 1]] = itemp2;
@@ -199,7 +199,7 @@ psycho_2_mem *psycho_2_init(twolame_options * glopts, int sfreq)
         }
     }
     numlines[partition[i - 1]] = itemp2;
-    cbval[partition[i - 1]] = cbval[partition[i - 1]] / itemp2;
+    cbval[partition[i - 1]] = cbval[partition[i - 1]] / (FLOAT)itemp2;
 
   /************************************************************************
    * Now compute the spreading function, s[j][i], the value of the spread-*
@@ -453,7 +453,7 @@ void psycho_2(twolame_options * glopts, FLOAT bufferF[2][1152],
 	   *****************************************************************************/
             for (j = 0; j < CBANDS; j++)
                 if (rnorm[j] && numlines[j])
-                    nb[j] = ecb[j] * bc[j] / (rnorm[j] * numlines[j]);
+                    nb[j] = ecb[j] * bc[j] / (rnorm[j] * (FLOAT)numlines[j]);
                 else
                     nb[j] = 0;
             for (j = 0; j < HBLKSIZE; j++) {

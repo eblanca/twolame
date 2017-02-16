@@ -102,7 +102,7 @@ int twolame_set_scale(twolame_options * glopts, float scale)
 
 float twolame_get_scale(twolame_options * glopts)
 {
-    return (glopts->scale);
+    return (float)(glopts->scale);
 }
 
 int twolame_set_scale_left(twolame_options * glopts, float scale)
@@ -117,7 +117,7 @@ int twolame_set_scale_left(twolame_options * glopts, float scale)
 
 float twolame_get_scale_left(twolame_options * glopts)
 {
-    return (glopts->scale_left);
+    return (float)(glopts->scale_left);
 }
 
 int twolame_set_scale_right(twolame_options * glopts, float scale)
@@ -132,7 +132,7 @@ int twolame_set_scale_right(twolame_options * glopts, float scale)
 
 float twolame_get_scale_right(twolame_options * glopts)
 {
-    return (glopts->scale_right);
+    return (float)(glopts->scale_right);
 }
 
 
@@ -280,7 +280,7 @@ int twolame_set_VBR_level(twolame_options * glopts, float level)
 
 float twolame_get_VBR_level(twolame_options * glopts)
 {
-    return (glopts->vbrlevel);
+    return (float)(glopts->vbrlevel);
 }
 
 // Deprecated:
@@ -297,7 +297,7 @@ int twolame_set_VBR_q(twolame_options * glopts, float level)
 // Deprecated:
 float twolame_get_VBR_q(twolame_options * glopts)
 {
-    return (glopts->vbrlevel);
+    return (float)(glopts->vbrlevel);
 }
 
 int twolame_set_ATH_level(twolame_options * glopts, float level)
@@ -308,7 +308,7 @@ int twolame_set_ATH_level(twolame_options * glopts, float level)
 
 float twolame_get_ATH_level(twolame_options * glopts)
 {
-    return (glopts->athlevel);
+    return (float)(glopts->athlevel);
 }
 
 int twolame_set_quick_mode(twolame_options * glopts, int quickmode)

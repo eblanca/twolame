@@ -40,8 +40,21 @@
  Common Definitions
 ****************************************************************************************/
 
-#ifndef FLOAT
+//#ifndef FLOAT
+#if 1
 #define			FLOAT					double
+#else
+#define			FLOAT					float
+#define         pow                     powf
+#define         exp                     expf
+#define         atan                    atanf
+#define         fabs                    fabsf
+#define         atan2                   atan2f
+#define         log10                   log10f
+#define         cos                     cosf
+#define         sqrt                    sqrtf
+#define         sin                     sinf
+#define         log                     logf
 #endif
 
 #define			NULL_CHAR				'\0'

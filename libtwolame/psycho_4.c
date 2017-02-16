@@ -208,7 +208,7 @@ static psycho_4_mem *psycho_4_init(twolame_options * glopts, int sfreq)
 
     /* calculate HANN window coefficients */
     for (i = 0; i < BLKSIZE; i++)
-        window[i] = 0.5 * (1 - cos(2.0 * PI * (i - 0.5) / BLKSIZE));
+        window[i] = 0.5 * (1 - cos(2.0 * PI * ((FLOAT)i - 0.5) / BLKSIZE));
 
     /* For each FFT line from 0(DC) to 512(Nyquist) calculate - bark : the bark value of this fft
        line - ath : the absolute threshold of hearing for this line [ATH]
@@ -217,7 +217,7 @@ static psycho_4_mem *psycho_4_init(twolame_options * glopts, int sfreq)
        frequency. Line 0 should correspond to DC - which doesn't really have a ATH afaik Line 1
        should be 1/1024th of the Sampling Freq Line 512 should be the nyquist freq */
     for (i = 0; i < HBLKSIZE; i++) {
-        FLOAT freq = i * (FLOAT) sfreq / (FLOAT) BLKSIZE;
+        FLOAT freq = (FLOAT)i * (FLOAT) sfreq / (FLOAT) BLKSIZE;
         bark[i] = ath_freq2bark(freq);
         /* The ath tables in the dist10 code seem to be a little out of kilter. they seem to start
            with index 0 corresponding to (sampling freq)/1024. When in doubt, i'm going to assume
@@ -254,7 +254,7 @@ static psycho_4_mem *psycho_4_init(twolame_options * glopts, int sfreq)
         cbval[partition[i]] += bark[i]; /* sum up all the bark values */
     for (i = 0; i < CBANDS; i++) {
         if (numlines[i] != 0)
-            cbval[i] /= numlines[i];    /* divide by the number of values */
+            cbval[i] /= (FLOAT)numlines[i];    /* divide by the number of values */
         else {
             cbval[i] = 0;       /* this isn't a partition */
         }
@@ -500,7 +500,7 @@ void psycho_4(twolame_options * glopts,
                - Spread the threshold energy over FFT lines */
             for (j = 0; j < CBANDS; j++) {
                 if (rnorm[j] && numlines[j])
-                    nb[j] = ecb[j] * bc[j] / (rnorm[j] * numlines[j]);
+                    nb[j] = ecb[j] * bc[j] / (rnorm[j] * (FLOAT)numlines[j]);
                 else
                     nb[j] = 0;
             }

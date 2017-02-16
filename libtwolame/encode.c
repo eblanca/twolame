@@ -188,7 +188,7 @@ int encode_init(twolame_options * glopts)
     int br_per_ch, sfrq;
 
     br_per_ch = glopts->bitrate / glopts->num_channels_out;
-    sfrq = (int) (glopts->samplerate_out / 1000.0);
+    sfrq = (int) ((FLOAT)glopts->samplerate_out / 1000.0);
 
     /* decision rules refer to per-channel bitrates (kbits/sec/chan) */
     if (header->version == TWOLAME_MPEG1) { /* MPEG-1 */
@@ -859,7 +859,7 @@ int init_bit_allocation(twolame_options * glopts)
        by vbr_bits_for_nonoise) */
     for (brindex = glopts->lower_index; brindex <= glopts->upper_index; brindex++) {
         glopts->bitrateindextobits[brindex] =
-            (int) (1152.0 / (glopts->samplerate_out / 1000.0) * (FLOAT) twolame_index_bitrate((int)glopts->version, brindex));
+            (int) (1152.0 / ((FLOAT)glopts->samplerate_out / 1000.0) * (FLOAT) twolame_index_bitrate((int)glopts->version, brindex));
     }
 
     return 0;
