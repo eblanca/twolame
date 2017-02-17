@@ -44,6 +44,9 @@
 #if 1
 #define			FLOAT					double
 #else
+/* when selecting 'float' as sample type, make sure gcc is run with
+   option "-fsingle-precision-constant" which instruct it to promote constant values
+   to float data type, not double (as per default) */
 #define			FLOAT					float
 #define         pow                     powf
 #define         exp                     expf
