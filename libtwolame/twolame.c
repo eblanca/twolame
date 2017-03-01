@@ -444,7 +444,7 @@ static void scale_and_mix_samples(twolame_options * glopts)
     // Downmix to Mono if 2 channels in and 1 channel out
     if (glopts->num_channels_in == 2 && glopts->num_channels_out == 1) {
         for (i = 0; i < num_samples; ++i) {
-            glopts->bufferF[0][i] = ((long) glopts->bufferF[0][i] + glopts->bufferF[1][i]) / 2;
+            glopts->bufferF[0][i] = (glopts->bufferF[0][i] + glopts->bufferF[1][i]) / 2;
             glopts->bufferF[1][i] = 0;
         }
     }
@@ -829,10 +829,14 @@ int twolame_encode_buffer_float32(twolame_options * glopts,
             samples_to_copy = num_samples;
 
         /* Copy across samples */
-        for (i=0; i<samples_to_copy; i++) {
-            glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
-            if (glopts->num_channels_in == 2)
+        if (glopts->num_channels_in == 2) {
+            for (i=0; i<samples_to_copy; i++) {
+                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
                 glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*rightpcm++);
+            }
+        } else {
+            for (i=0; i<samples_to_copy; i++)
+                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
         }
 
         /* Update sample counts */
@@ -884,10 +888,14 @@ int twolame_encode_buffer_float32_interleaved(twolame_options * glopts,
             samples_to_copy = num_samples;
 
         /* Copy across samples */
-        for(i=0; i<samples_to_copy; i++) {
-            glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
-            if (glopts->num_channels_in == 2)
+        if (glopts->num_channels_in == 2) {
+            for(i=0; i<samples_to_copy; i++) {
+                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
                 glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
+            }
+        } else {
+            for(i=0; i<samples_to_copy; i++)
+                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
         }
 
 
