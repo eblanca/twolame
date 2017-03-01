@@ -58,6 +58,7 @@
 #define         sqrt                    sqrtf
 #define         sin                     sinf
 #define         log                     logf
+#define         trunc                   truncf
 #endif
 
 #define			NULL_CHAR				'\0'

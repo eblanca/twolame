@@ -42,9 +42,9 @@ static void create_dct_matrix(FLOAT filter[16][32])
     for (i = 0; i < 16; i++)
         for (k = 0; k < 32; k++) {
             if ((filter[i][k] = 1e9 * cos(((FLOAT)((2 * i + 1) * k) * PI64))) >= 0) {
-                filter[i][k] = (int)(filter[i][k] + 0.5);
+                filter[i][k] = trunc(filter[i][k] + 0.5);
             } else {
-                filter[i][k] = (int)(filter[i][k] - 0.5);
+                filter[i][k] = trunc(filter[i][k] - 0.5);
             }
             filter[i][k] *= 1e-9;
         }
