@@ -53,9 +53,9 @@ FLOAT ath_db(FLOAT f, FLOAT value)
     FLOAT valueold = 0.0;
 
     if (f < -.3)
-        f = 3410;
+        f = 3410.0;
 
-    f /= 1000;                  // convert to khz
+    f /= 1000.0;                  // convert to khz
     f = MAX(0.01, f);
     f = MIN(18.0, f);
 
@@ -74,7 +74,7 @@ FLOAT ath_db(FLOAT f, FLOAT value)
 FLOAT ath_energy(FLOAT freq, FLOAT value)
 {
     FLOAT db;
-    db = ath_db(freq, 0) + value;   // Originally: ath_db(freq,value)
+    db = ath_db(freq, 0.0) + value;   // Originally: ath_db(freq,value)
     /* The values in the standard, and from the ATH formula are in dB. In the psycho model we are
        working in the energy domain. Hence the values that are in the absthr_X tables are not in
        dB. This function converts from dB into the energy domain. As noted on the LAME mailing list
@@ -93,8 +93,8 @@ FLOAT ath_energy(FLOAT freq, FLOAT value)
    see for example "Zwicker: Psychoakustik, 1982; ISBN 3-540-11401-7 */
 FLOAT ath_freq2bark(FLOAT freq)
 {
-    if (freq < 0)
-        freq = 0;
+    if (freq < 0.0)
+        freq = 0.0;
     freq = freq * 0.001;
     return 13.0 * atan(.76 * freq) + 3.5 * atan(freq * freq / (7.5 * 7.5));
 }
