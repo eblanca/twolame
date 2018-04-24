@@ -232,7 +232,7 @@ check_prog_version() {
     else
       # Things are ok, so set the ${prog} name
       eval ${prog}=${prog_name}
-    fi 
+    fi
   else
     echo "$program: ERROR: You must have \`$prog' installed to compile this package."
     echo "     (version $min or newer is required)"
@@ -304,7 +304,7 @@ if test -f $GITMODULES ; then
 fi
 
 for coin in `find $SRCDIR -name configure.ac -print | grep -v /releases/`
-do 
+do
   status=0
   dir=`dirname $coin`
   if test -f "$dir/NO-AUTO-GEN"; then
@@ -364,13 +364,6 @@ do
 	    break
 	fi
       fi
-
-      for docs in NEWS README; do
-	if test ! -f $docs; then
-	  echo "$program: Creating empty $docs file to allow configure to work"
-	  $DRYRUN touch -t 200001010000 $docs
-	fi
-      done
 
       echo "$program: Running $aclocal $aclocal_args"
       $DRYRUN $aclocal $aclocal_args

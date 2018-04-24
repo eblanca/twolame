@@ -1,24 +1,22 @@
 /*
- *	TwoLAME: an optimized MPEG Audio Layer Two encoder
+ *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
- *	Copyright (C) 2001-2004 Michael Cheng
- *	Copyright (C) 2004-2006 The TwoLAME Project
+ *  Copyright (C) 2001-2004 Michael Cheng
+ *  Copyright (C) 2004-2017 The TwoLAME Project
  *
- *	This library is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU Lesser General Public
- *	License as published by the Free Software Foundation; either
- *	version 2.1 of the License, or (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
- *	This library is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *	Lesser General Public License for more details.
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *	You should have received a copy of the GNU Lesser General Public
- *	License along with this library; if not, write to the Free Software
- *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *  $Id$
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
@@ -83,7 +81,7 @@ twolame_options *twolame_init(void)
     newoptions->quickmode = FALSE;
     newoptions->quickcount = 10;
     newoptions->emphasis = TWOLAME_EMPHASIS_N;
-    newoptions->private_bit = 0;
+    newoptions->private_extension = 0;
     newoptions->copyright = FALSE;
     newoptions->original = TRUE;
     newoptions->error_protection = FALSE;
@@ -154,16 +152,20 @@ static int init_header_info(twolame_options * glopts)
             return -1;
         }
     }
-    // Convert the max VBR bitrate to the an index
-    glopts->vbr_upper_index = twolame_get_bitrate_index(glopts->vbr_max_bitrate, header->version);
-    if (glopts->vbr_upper_index < 0) {
-        fprintf(stderr, "Not a valid max VBR bitrate for this version: %i\n",
-                glopts->vbr_max_bitrate);
-        return -1;
+    if (glopts->vbr && glopts->vbr_max_bitrate > 0)
+    {
+        /* user required vbr and a specified max bitrate */
+        /* convert max VBR bitrate to an index */
+        glopts->vbr_upper_index = twolame_get_bitrate_index(glopts->vbr_max_bitrate, header->version);
+        if (glopts->vbr_upper_index < 0) {
+            fprintf(stderr, "Not a valid max VBR bitrate for this version: %i\n",
+                    glopts->vbr_max_bitrate);
+            return -1;
+        }
     }
     // Copy accross the other settings
-    header->padding = glopts->padding;
-    header->private_bit = glopts->private_bit;
+    header->padding = 0; /* when requested, padding will be evaluated later for this frame */
+    header->private_extension = glopts->private_extension;
     header->mode = glopts->mode;
     header->mode_ext = 0;
     header->copyright = glopts->copyright;
@@ -288,10 +290,10 @@ int twolame_init_params(twolame_options * glopts)
 
     /* Check for bitrate validity */
     if (glopts->version == TWOLAME_MPEG1
-        &&
-        !glopts->freeformat
-        &&
-        !glopts->vbr) {
+            &&
+            !glopts->freeformat
+            &&
+            !glopts->vbr) {
         /* some limitation apply for MPEG1 when CBR and freeformat is not selected */
         if (glopts->mode == TWOLAME_MONO) {
             if (glopts->bitrate > 192) {
@@ -354,6 +356,14 @@ int twolame_init_params(twolame_options * glopts)
         fprintf(stderr, "Error: Can't do padding and VBR at same time\n");
         return -1;
     }
+
+    /* Simple patch for the `bit_stream buffer needs to be bigger' warning */
+    /* Fix FREEFORMAT_MAX_BITRATE definition when github issue #51 will be closed */
+    if (glopts->freeformat && glopts->bitrate > FREEFORMAT_MAX_BITRATE) {
+        fprintf(stderr, "twolame_init_params(): cannot encode freeformat stream at %d kbps\n", glopts->bitrate);
+        return -1;
+    }
+
     // Set the Number of output channels
     glopts->num_channels_out = (glopts->mode == TWOLAME_MONO) ? 1 : 2;
 
@@ -387,6 +397,17 @@ int twolame_init_params(twolame_options * glopts)
     glopts->subband = (subband_t *) TWOLAME_MALLOC(sizeof(subband_t));
     glopts->j_sample = (jsb_sample_t *) TWOLAME_MALLOC(sizeof(jsb_sample_t));
     glopts->sb_sample = (sb_sample_t *) TWOLAME_MALLOC(sizeof(sb_sample_t));
+    if (glopts->subband == NULL
+        ||
+        glopts->j_sample == NULL
+        ||
+        glopts->sb_sample == NULL)
+    {
+        TWOLAME_FREE(glopts->subband);
+        TWOLAME_FREE(glopts->j_sample);
+        TWOLAME_FREE(glopts->sb_sample);
+        return -1;
+    }
 
     // clear buffers
     memset((char *) glopts->bufferF, 0, sizeof(glopts->bufferF));
@@ -458,13 +479,13 @@ static void scale_and_mix_samples(twolame_options * glopts)
 }
 
 /*
-	Encode a single frame of audio from 1152 samples
-	Audio samples are taken from glopts->buffer
-	Encoded bit stream is placed in to parameter bs
-	(not intended for use outside the library)
+    Encode a single frame of audio from 1152 samples
+    Audio samples are taken from glopts->buffer
+    Encoded bit stream is placed in to parameter bs
+    (not intended for use outside the library)
 
-	Returns the size of the frame
-	or -1 if there is an error
+    Returns the size of the frame
+    or -1 if there is an error
 */
 static int encode_frame(twolame_options * glopts, bit_stream * bs)
 {
@@ -597,9 +618,8 @@ static int encode_frame(twolame_options * glopts, bit_stream * bs)
         buffer_put1bit(bs, 0);
 
 
-    /* MFC July 03 FIXME Write an extra byte for 16/24/32/48 input when padding is on. Something
-       must be going astray with the frame size calcs. This fudge works fine for the moment */
-    if ((glopts->header.samplerate_idx != 0) && (glopts->padding))  // i.e. not a 44.1 or 22kHz
+    /* pad the current frame when needed */
+    if (glopts->header.padding)
         // input file
         buffer_putbits(bs, 0, 8);
 
@@ -670,45 +690,46 @@ int twolame_encode_buffer(twolame_options * glopts,
     // samples/1152 * sizeof(frame) < mp2buffer_size
     mybs = buffer_init(mp2buffer, mp2buffer_size);
 
+    if (mybs != NULL) {
+        // Use up all the samples in in_buffer
+        while (num_samples) {
 
-    // Use up all the samples in in_buffer
-    while (num_samples) {
+            // fill up glopts->buffer with as much as we can
+            int samples_to_copy = TWOLAME_SAMPLES_PER_FRAME - glopts->samples_in_buffer;
+            if (num_samples < samples_to_copy)
+                samples_to_copy = num_samples;
 
-        // fill up glopts->buffer with as much as we can
-        int samples_to_copy = TWOLAME_SAMPLES_PER_FRAME - glopts->samples_in_buffer;
-        if (num_samples < samples_to_copy)
-            samples_to_copy = num_samples;
+            /* Copy across samples */
+            if (glopts->num_channels_in == 2)
+                for (i = 0; i < samples_to_copy; i++) {
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = *leftpcm++;
+                    glopts->bufferF[1][glopts->samples_in_buffer + i] = *rightpcm++;
+                }
+            else
+                for (i = 0; i < samples_to_copy; i++)
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = *leftpcm++;
 
-        /* Copy across samples */
-        if (glopts->num_channels_in == 2)
-            for (i = 0; i < samples_to_copy; i++) {
-                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++) * DOWN_SCALE;
-                glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*rightpcm++) * DOWN_SCALE;
+
+            /* Update sample counts */
+            glopts->samples_in_buffer += samples_to_copy;
+            num_samples -= samples_to_copy;
+
+
+            // is there enough to encode a whole frame ?
+            if (glopts->samples_in_buffer >= TWOLAME_SAMPLES_PER_FRAME) {
+                int bytes = encode_frame(glopts, mybs);
+                if (bytes <= 0) {
+                    buffer_deinit(&mybs);
+                    return bytes;
+                }
+                mp2_size += bytes;
+                glopts->samples_in_buffer -= TWOLAME_SAMPLES_PER_FRAME;
             }
-        else
-            for (i = 0; i < samples_to_copy; i++)
-                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++) * DOWN_SCALE;
-
-
-        /* Update sample counts */
-        glopts->samples_in_buffer += samples_to_copy;
-        num_samples -= samples_to_copy;
-
-
-        // is there enough to encode a whole frame ?
-        if (glopts->samples_in_buffer >= TWOLAME_SAMPLES_PER_FRAME) {
-            int bytes = encode_frame(glopts, mybs);
-            if (bytes <= 0) {
-                buffer_deinit(&mybs);
-                return bytes;
-            }
-            mp2_size += bytes;
-            glopts->samples_in_buffer -= TWOLAME_SAMPLES_PER_FRAME;
         }
-    }
 
-    // free up the bit stream buffer structure
-    buffer_deinit(&mybs);
+        // free up the bit stream buffer structure
+        buffer_deinit(&mybs);
+    }
 
     return (mp2_size);
 }
@@ -730,45 +751,46 @@ int twolame_encode_buffer_interleaved(twolame_options * glopts,
     // samples/1152 * sizeof(frame) < mp2buffer_size
     mybs = buffer_init(mp2buffer, mp2buffer_size);
 
-    // Use up all the samples in in_buffer
-    while (num_samples) {
+    if (mybs != NULL) {
+        // Use up all the samples in in_buffer
+        while (num_samples) {
 
-        // fill up glopts->buffer with as much as we can
-        int samples_to_copy = TWOLAME_SAMPLES_PER_FRAME - glopts->samples_in_buffer;
-        if (num_samples < samples_to_copy)
-            samples_to_copy = num_samples;
+            // fill up glopts->buffer with as much as we can
+            int samples_to_copy = TWOLAME_SAMPLES_PER_FRAME - glopts->samples_in_buffer;
+            if (num_samples < samples_to_copy)
+                samples_to_copy = num_samples;
 
-        /* Copy across samples */
-        if (glopts->num_channels_in == 2)
-            for (i = 0; i < samples_to_copy; i++) {
-                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++) * DOWN_SCALE;
-                glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++) * DOWN_SCALE;
+            /* Copy across samples */
+            if (glopts->num_channels_in == 2)
+                for (i = 0; i < samples_to_copy; i++) {
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = *pcm++;
+                    glopts->bufferF[1][glopts->samples_in_buffer + i] = *pcm++;
+                }
+            else
+                for (i = 0; i < samples_to_copy; i++)
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = *pcm++;
+
+
+            /* Update sample counts */
+            glopts->samples_in_buffer += samples_to_copy;
+            num_samples -= samples_to_copy;
+
+
+            // is there enough to encode a whole frame ?
+            if (glopts->samples_in_buffer >= TWOLAME_SAMPLES_PER_FRAME) {
+                int bytes = encode_frame(glopts, mybs);
+                if (bytes <= 0) {
+                    buffer_deinit(&mybs);
+                    return bytes;
+                }
+                mp2_size += bytes;
+                glopts->samples_in_buffer -= TWOLAME_SAMPLES_PER_FRAME;
             }
-        else
-            for (i = 0; i < samples_to_copy; i++)
-                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++) * DOWN_SCALE;
-
-
-        /* Update sample counts */
-        glopts->samples_in_buffer += samples_to_copy;
-        num_samples -= samples_to_copy;
-
-
-        // is there enough to encode a whole frame ?
-        if (glopts->samples_in_buffer >= TWOLAME_SAMPLES_PER_FRAME) {
-            int bytes = encode_frame(glopts, mybs);
-            if (bytes <= 0) {
-                buffer_deinit(&mybs);
-                return bytes;
-            }
-            mp2_size += bytes;
-            glopts->samples_in_buffer -= TWOLAME_SAMPLES_PER_FRAME;
         }
+
+        // free up the bit stream buffer structure
+        buffer_deinit(&mybs);
     }
-
-    // free up the bit stream buffer structure
-    buffer_deinit(&mybs);
-
 
     return (mp2_size);
 }
@@ -819,54 +841,55 @@ int twolame_encode_buffer_float32(twolame_options * glopts,
     // samples/1152 * sizeof(frame) < mp2buffer_size
     mybs = buffer_init(mp2buffer, mp2buffer_size);
 
+    if (mybs != NULL) {
+        // Use up all the samples in in_buffer
+        while (num_samples) {
 
-    // Use up all the samples in in_buffer
-    while (num_samples) {
+            // fill up glopts->buffer with as much as we can
+            int samples_to_copy = TWOLAME_SAMPLES_PER_FRAME - glopts->samples_in_buffer;
+            if (num_samples < samples_to_copy)
+                samples_to_copy = num_samples;
 
-        // fill up glopts->buffer with as much as we can
-        int samples_to_copy = TWOLAME_SAMPLES_PER_FRAME - glopts->samples_in_buffer;
-        if (num_samples < samples_to_copy)
-            samples_to_copy = num_samples;
-
-        /* Copy across samples */
-        if (glopts->num_channels_in == 2) {
-            for (i=0; i<samples_to_copy; i++) {
-                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
-                glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*rightpcm++);
+            /* Copy across samples */
+            if (glopts->num_channels_in == 2) {
+                for (i=0; i<samples_to_copy; i++) {
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
+                    glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*rightpcm++);
+                }
+            } else {
+                for (i=0; i<samples_to_copy; i++)
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
             }
-        } else {
-            for (i=0; i<samples_to_copy; i++)
-                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
+
+            /* Update sample counts */
+            glopts->samples_in_buffer += samples_to_copy;
+            num_samples -= samples_to_copy;
+
+
+            // is there enough to encode a whole frame ?
+            if (glopts->samples_in_buffer >= TWOLAME_SAMPLES_PER_FRAME) {
+                int bytes = encode_frame(glopts, mybs);
+                if (bytes <= 0) {
+                    buffer_deinit(&mybs);
+                    return bytes;
+                }
+                mp2_size += bytes;
+                glopts->samples_in_buffer -= TWOLAME_SAMPLES_PER_FRAME;
+            }
         }
 
-        /* Update sample counts */
-        glopts->samples_in_buffer += samples_to_copy;
-        num_samples -= samples_to_copy;
-
-
-        // is there enough to encode a whole frame ?
-        if (glopts->samples_in_buffer >= TWOLAME_SAMPLES_PER_FRAME) {
-            int bytes = encode_frame(glopts, mybs);
-            if (bytes <= 0) {
-                buffer_deinit(&mybs);
-                return bytes;
-            }
-            mp2_size += bytes;
-            glopts->samples_in_buffer -= TWOLAME_SAMPLES_PER_FRAME;
-        }
+        // free up the bit stream buffer structure
+        buffer_deinit(&mybs);
     }
-
-    // free up the bit stream buffer structure
-    buffer_deinit(&mybs);
 
     return (mp2_size);
 }
 
 
 int twolame_encode_buffer_float32_interleaved(twolame_options * glopts,
-                                              const float pcm[],
-                                              int num_samples,
-                                              unsigned char *mp2buffer, int mp2buffer_size)
+        const float pcm[],
+        int num_samples,
+        unsigned char *mp2buffer, int mp2buffer_size)
 {
     int mp2_size = 0, i;
     bit_stream *mybs;
@@ -879,46 +902,47 @@ int twolame_encode_buffer_float32_interleaved(twolame_options * glopts,
     // samples/1152 * sizeof(frame) < mp2buffer_size
     mybs = buffer_init(mp2buffer, mp2buffer_size);
 
-    // Use up all the samples in in_buffer
-    while (num_samples) {
+    if (mybs != NULL) {
+        // Use up all the samples in in_buffer
+        while (num_samples) {
 
-        // fill up glopts->buffer with as much as we can
-        int samples_to_copy = TWOLAME_SAMPLES_PER_FRAME - glopts->samples_in_buffer;
-        if (num_samples < samples_to_copy)
-            samples_to_copy = num_samples;
+            // fill up glopts->buffer with as much as we can
+            int samples_to_copy = TWOLAME_SAMPLES_PER_FRAME - glopts->samples_in_buffer;
+            if (num_samples < samples_to_copy)
+                samples_to_copy = num_samples;
 
-        /* Copy across samples */
-        if (glopts->num_channels_in == 2) {
-            for(i=0; i<samples_to_copy; i++) {
-                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
-                glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
+            /* Copy across samples */
+            if (glopts->num_channels_in == 2) {
+                for(i=0; i<samples_to_copy; i++) {
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
+                    glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
+                }
+            } else {
+                for(i=0; i<samples_to_copy; i++)
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
             }
-        } else {
-            for(i=0; i<samples_to_copy; i++)
-                glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
+
+
+            /* Update sample counts */
+            glopts->samples_in_buffer += samples_to_copy;
+            num_samples -= samples_to_copy;
+
+
+            // is there enough to encode a whole frame ?
+            if (glopts->samples_in_buffer >= TWOLAME_SAMPLES_PER_FRAME) {
+                int bytes = encode_frame(glopts, mybs);
+                if (bytes <= 0) {
+                    buffer_deinit(&mybs);
+                    return bytes;
+                }
+                mp2_size += bytes;
+                glopts->samples_in_buffer -= TWOLAME_SAMPLES_PER_FRAME;
+            }
         }
 
-
-        /* Update sample counts */
-        glopts->samples_in_buffer += samples_to_copy;
-        num_samples -= samples_to_copy;
-
-
-        // is there enough to encode a whole frame ?
-        if (glopts->samples_in_buffer >= TWOLAME_SAMPLES_PER_FRAME) {
-            int bytes = encode_frame(glopts, mybs);
-            if (bytes <= 0) {
-                buffer_deinit(&mybs);
-                return bytes;
-            }
-            mp2_size += bytes;
-            glopts->samples_in_buffer -= TWOLAME_SAMPLES_PER_FRAME;
-        }
+        // free up the bit stream buffer structure
+        buffer_deinit(&mybs);
     }
-
-    // free up the bit stream buffer structure
-    buffer_deinit(&mybs);
-
 
     return (mp2_size);
 }
@@ -938,17 +962,19 @@ int twolame_encode_flush(twolame_options * glopts, unsigned char *mp2buffer, int
     // Create bit stream structure
     mybs = buffer_init(mp2buffer, mp2buffer_size);
 
-    // Pad out the PCM buffers with 0 and encode the frame
-    for (i = glopts->samples_in_buffer; i < TWOLAME_SAMPLES_PER_FRAME; i++) {
-        glopts->bufferF[0][i] = glopts->bufferF[1][i] = 0.0;
+    if (mybs != NULL) {
+        // Pad out the PCM buffers with 0 and encode the frame
+        for (i = glopts->samples_in_buffer; i < TWOLAME_SAMPLES_PER_FRAME; i++) {
+            glopts->bufferF[0][i] = glopts->bufferF[1][i] = 0.0;
+        }
+
+        // Encode the frame
+        mp2_size = encode_frame(glopts, mybs);
+        glopts->samples_in_buffer = 0;
+
+        // free up the bit stream buffer structure
+        buffer_deinit(&mybs);
     }
-
-    // Encode the frame
-    mp2_size = encode_frame(glopts, mybs);
-    glopts->samples_in_buffer = 0;
-
-    // free up the bit stream buffer structure
-    buffer_deinit(&mybs);
 
     return mp2_size;
 }

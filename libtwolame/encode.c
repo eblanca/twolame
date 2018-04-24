@@ -1,24 +1,22 @@
 /*
- *	TwoLAME: an optimized MPEG Audio Layer Two encoder
+ *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
- *	Copyright (C) 2001-2004 Michael Cheng
- *	Copyright (C) 2004-2006 The TwoLAME Project
+ *  Copyright (C) 2001-2004 Michael Cheng
+ *  Copyright (C) 2004-2017 The TwoLAME Project
  *
- *	This library is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU Lesser General Public
- *	License as published by the Free Software Foundation; either
- *	version 2.1 of the License, or (at your option) any later version.
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
  *
- *	This library is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *	Lesser General Public License for more details.
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
  *
- *	You should have received a copy of the GNU Lesser General Public
- *	License along with this library; if not, write to the Free Software
- *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *  $Id$
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
@@ -91,13 +89,13 @@ static const int step_index[9][16] = {
 static const int nbal[9] = { 4, 4, 3, 2, 4, 3, 4, 3, 2 };
 
 
-/* 0, 1, 2, 3, 4,  5,  6,  7,  8,	9,	 10,   11,	 12,   13,	 14,   15,	  16,	 17 */
+/* 0, 1, 2, 3, 4,  5,  6,  7,  8,    9,     10,   11,     12,   13,     14,   15,      16,     17 */
 /* The number of steps allowed */
 static const int steps[18] =
-    { 0, 3, 5, 7, 9, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535 };
+{ 0, 3, 5, 7, 9, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535 };
 /* The power of 2 just under the steps value */
 static const int steps2n[18] =
-    { 0, 2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
+{ 0, 2, 4, 4, 8, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768 };
 /* The bits per codeword from TableB.4 */
 static const int bits[18] = { 0, 5, 7, 3, 10, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
 
@@ -119,14 +117,18 @@ static const int table_sblimit[5] = { 27, 30, 8, 12, 30 };
 static const int line[5][SBLIMIT] = {
     /* 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
        31 */
-    {0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, -1, -1, -1,
-     -1, -1},
-    {0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, -1,
-     -1},
-    {4, 4, 5, 5, 5, 5, 5, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-     -1, -1, -1, -1, -1, -1},
-    {4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-     -1, -1, -1, -1, -1},
+    {   0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, -1, -1, -1,
+        -1, -1
+    },
+    {   0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, -1,
+        -1
+    },
+    {   4, 4, 5, 5, 5, 5, 5, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1
+    },
+    {   4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1
+    },
     /* LSF Table */
     {6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8}
 };
@@ -155,12 +157,12 @@ static const FLOAT scalefactor[64] = {  /* Equation for nth element = 2 / (cuber
 /* ISO11172 Table C.5 Layer II Signal to Noise Raios
    MFC FIX find a reference for these in terms of bits->SNR value
    Index into table is the steps index
-   index   steps	SNR
-	   0	   0	0.00
-	   1	   3	7.00
-	   2	   5   11.00
-	   3	   7   16.00
-	   4	   9   20.84
+   index   steps    SNR
+       0       0    0.00
+       1       3    7.00
+       2       5   11.00
+       3       7   16.00
+       4       9   20.84
   etc
 */
 static const FLOAT SNR[18] = {
@@ -192,15 +194,19 @@ int encode_init(twolame_options * glopts)
 
     /* decision rules refer to per-channel bitrates (kbits/sec/chan) */
     if (header->version == TWOLAME_MPEG1) { /* MPEG-1 */
-        if ((sfrq == 48 && br_per_ch >= 56)
-            || (br_per_ch >= 56 && br_per_ch <= 80))
-            glopts->tablenum = 0;
-        else if (sfrq != 48 && br_per_ch >= 96)
-            glopts->tablenum = 1;
-        else if (sfrq != 32 && br_per_ch <= 48)
-            glopts->tablenum = 2;
-        else
-            glopts->tablenum = 3;
+        if (glopts->freeformat) {
+            glopts->tablenum = (sfrq == 48) ? 0 : 1;
+        } else {
+            if ((sfrq == 48 && br_per_ch >= 56)
+                    || (br_per_ch >= 56 && br_per_ch <= 80))
+                glopts->tablenum = 0;
+            else if (sfrq != 48 && br_per_ch >= 96)
+                glopts->tablenum = 1;
+            else if (sfrq != 32 && br_per_ch <= 48)
+                glopts->tablenum = 2;
+            else
+                glopts->tablenum = 3;
+        }
     } else {                    /* MPEG-2 LSF */
         glopts->tablenum = 4;
     }
@@ -258,16 +264,16 @@ int encode_init(twolame_options * glopts)
    scale_factor_calc
    pick_scale
    if JOINTSTEREO
-		 combine_LR
-		 scale_factor_calc
+         combine_LR
+         scale_factor_calc
    use psy model to determine SMR
    transmission pattern
    main_bit_allocation
    if (error protection)
-		 calc CRC
+         calc CRC
    encode_info
    if (error_protection)
-		 encode_CRC
+         encode_CRC
    encode_bit_alloc
    encode_scale
    subband_quantization
@@ -366,14 +372,14 @@ void find_sf_max(twolame_options * glopts,
         sf_max[0][sb] = sf_max[1][sb] = 1E-20;
 }
 
-/*	sf_transmission_pattern
-	PURPOSE:For a given subband, determines whether to send 1, 2, or
-	all 3 of the scalefactors, and fills in the scalefactor
-	select information accordingly
+/*    sf_transmission_pattern
+    PURPOSE:For a given subband, determines whether to send 1, 2, or
+    all 3 of the scalefactors, and fills in the scalefactor
+    select information accordingly
 
-	This is From ISO11172 Sect C.1.5.2.5 "coding of scalefactors"
-	and
-	Table C.4 "LayerII Scalefactors Transmission Pattern"
+    This is From ISO11172 Sect C.1.5.2.5 "coding of scalefactors"
+    and
+    Table C.4 "LayerII Scalefactors Transmission Pattern"
 */
 void sf_transmission_pattern(twolame_options * glopts,
                              unsigned int sf_index[2][3][SBLIMIT],
@@ -456,7 +462,7 @@ void write_header(twolame_options * glopts, bit_stream * bs)
     buffer_putbits(bs, header->bitrate_index, 4);
     buffer_putbits(bs, header->samplerate_idx, 2);
     buffer_put1bit(bs, header->padding);
-    buffer_put1bit(bs, header->private_bit);    /* private_bit */
+    buffer_put1bit(bs, header->private_extension);    /* private extension bit */
     buffer_putbits(bs, header->mode, 2);
     buffer_putbits(bs, header->mode_ext, 2);
     buffer_put1bit(bs, header->copyright);
@@ -561,7 +567,7 @@ static const FLOAT b[18] = {
 
  PURPOSE:Quantizes subband samples to appropriate number of bits
 
- SEMANTICS:	 Subband samples are divided by their scalefactors, which
+ SEMANTICS:     Subband samples are divided by their scalefactors, which
  makes the quantization more efficient. The scaled samples are
  quantized by the function a*x+b, where a and b are functions of
  the number of quantization levels. The result is then truncated
@@ -640,11 +646,11 @@ subband_quantization(twolame_options * glopts,
 }
 
 /************************************************************************
-	sample_encoding
+    sample_encoding
 
  PURPOSE:Put one frame of subband samples on to the bitstream
 
- SEMANTICS:	 The number of bits allocated per sample is read from
+ SEMANTICS:     The number of bits allocated per sample is read from
  the bit allocation information #bit_alloc#.  Layer 2
  supports writing grouped samples for quantization steps
  that are not a power of 2.
@@ -707,7 +713,7 @@ void write_samples(twolame_options * glopts,
 * following occurs:
 * - Hit maximum number of bits we can allocate for that subband
 * - MNR is better than or equal to the minimum masking level
-*	(NOISY_MIN_MNR)
+*    (NOISY_MIN_MNR)
 * Then the bits required for scalefactors, scfsi, bit allocation,
 * and the subband samples are tallied (#req_bits#) and returned.
 *
@@ -811,13 +817,15 @@ int init_bit_allocation(twolame_options * glopts)
 
     static const int vbrlimits[2][3][2] = {
         /* MONO */
-        { /* 44 */ {6, 10},
-         /* 48 */ {3, 10},
-         /* 32 */ {6, 10}},
+        {   /* 44 */ {6, 10},
+            /* 48 */ {3, 10},
+            /* 32 */ {6, 10}
+        },
         /* STEREO */
-        { /* 44 */ {10, 14},
-         /* 48 */ {7, 14},
-         /* 32 */ {10, 14}}
+        {   /* 44 */ {10, 14},
+            /* 48 */ {7, 14},
+            /* 32 */ {10, 14}
+        }
     };
 
 
@@ -837,7 +845,7 @@ int init_bit_allocation(twolame_options * glopts)
     if (glopts->vbr_upper_index > 0) {
         /* User is requesting a specific upperbitrate */
         if ((glopts->vbr_upper_index < glopts->lower_index) ||
-            (glopts->vbr_upper_index > glopts->upper_index)) {
+                (glopts->vbr_upper_index > glopts->upper_index)) {
             fprintf(stderr, "Can't satisfy upper bitrate index constraint. out of bounds. %i\n",
                     glopts->vbr_upper_index);
             return -2;
@@ -884,10 +892,10 @@ int init_bit_allocation(twolame_options * glopts)
 * of the following occurs:
 * - there are no more noisy subbands (MNR >= NOISY_MIN_MNR)
 * - mode_ext has been reduced to 0, which means that all but the
-*	lowest 4 subbands have been converted from stereo to joint
-*	stereo, and no more subbands may be converted
+*    lowest 4 subbands have been converted from stereo to joint
+*    stereo, and no more subbands may be converted
 *
-*	  This function calls *_bits_for_nonoise() and *_a_bit_allocation().
+*      This function calls *_bits_for_nonoise() and *_a_bit_allocation().
 *
 ************************************************************************/
 void main_bit_allocation(twolame_options * glopts,
@@ -1072,7 +1080,8 @@ int vbr_bit_allocation(twolame_options * glopts,
         vbr_maxmnr(mnr, used, sblimit, nch, &min_sb, &min_ch, glopts->vbrlevel);
 
         if (min_sb > -1) {      /* there was something to find */
-            int thisline = line[glopts->tablenum][min_sb]; {
+            int thisline = line[glopts->tablenum][min_sb];
+            {
                 /* find increase in bit allocation in subband [min] */
                 int nextstep_index = step_index[thisline][bit_alloc[min_ch][min_sb] + 1];
                 increment = SCALE_BLOCK * group[nextstep_index] * bits[nextstep_index];
@@ -1111,7 +1120,7 @@ int vbr_bit_allocation(twolame_options * glopts,
                 mnr[min_ch][min_sb] = SNR[thisstep_index] - SMR[min_ch][min_sb];
                 /* Check if this min_sb subband has been fully allocated max bits */
                 if (ba >= (1 << nbal[line[glopts->tablenum][min_sb]]) - 1)  // (*alloc)[min_sb][0].bits)
-                                                                            //
+                    //
                     // - 1)
                     used[min_ch][min_sb] = 2;   /* don't let this sb get any more bits */
             } else {
@@ -1165,18 +1174,18 @@ static void maxmnr(FLOAT mnr[2][SBLIMIT], char used[2][SBLIMIT], int sblimit,
 *
 * SEMANTICS:
 * 1. Find the subband and channel with the smallest MNR (#min_sb#,
-*	 and #min_ch#)
+*     and #min_ch#)
 * 2. Calculate the increase in bits needed if we increase the bit
-*	 allocation to the next higher level
+*     allocation to the next higher level
 * 3. If there are enough bits available for increasing the resolution
-*	 in #min_sb#, #min_ch#, and the subband has not yet reached its
-*	 maximum allocation, update the bit allocation, MNR, and bits
-*	 available accordingly
+*     in #min_sb#, #min_ch#, and the subband has not yet reached its
+*     maximum allocation, update the bit allocation, MNR, and bits
+*     available accordingly
 * 4. Repeat until there are no more bits left, or no more available
-*	 subbands. (A subband is still available until the maximum
-*	 number of bits for the subband has been allocated, or there
-*	 aren't enough bits to go to the next higher resolution in the
-*	 subband.)
+*     subbands. (A subband is still available until the maximum
+*     number of bits for the subband has been allocated, or there
+*     aren't enough bits to go to the next higher resolution in the
+*     subband.)
 *
 ************************************************************************/
 
@@ -1226,7 +1235,8 @@ int a_bit_allocation(twolame_options * glopts, FLOAT SMR[2][SBLIMIT],
         maxmnr(mnr, used, sblimit, nch, &min_sb, &min_ch);
 
         if (min_sb > -1) {      /* there was something to find */
-            int thisline = line[glopts->tablenum][min_sb]; {
+            int thisline = line[glopts->tablenum][min_sb];
+            {
                 /* find increase in bit allocation in subband [min] */
                 int nextstep_index = step_index[thisline][bit_alloc[min_ch][min_sb] + 1];
                 increment = SCALE_BLOCK * group[nextstep_index] * bits[nextstep_index];
@@ -1265,7 +1275,7 @@ int a_bit_allocation(twolame_options * glopts, FLOAT SMR[2][SBLIMIT],
                 mnr[min_ch][min_sb] = SNR[thisstep_index] - SMR[min_ch][min_sb];
                 /* Check if this min_sb subband has been fully allocated max bits */
                 if (ba >= (1 << nbal[line[glopts->tablenum][min_sb]]) - 1)  // (*alloc)[min_sb][0].bits)
-                                                                            //
+                    //
                     // - 1)
                     used[min_ch][min_sb] = 2;   /* don't let this sb get any more bits */
             } else {
