@@ -2,7 +2,7 @@
  *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
  *  Copyright (C) 2001-2004 Michael Cheng
- *  Copyright (C) 2004-2017 The TwoLAME Project
+ *  Copyright (C) 2004-2018 The TwoLAME Project
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -47,7 +47,7 @@ static void create_dct_matrix(FLOAT filter[16][32])
         }
 }
 
-int init_subband(subband_mem * smem)
+int twolame_init_subband(subband_mem * smem)
 {
     memset(smem, 0, sizeof(subband_mem));
     create_dct_matrix(smem->m);
@@ -56,7 +56,7 @@ int init_subband(subband_mem * smem)
 }
 
 
-void window_filter_subband(subband_mem * smem, short *pBuffer, int ch, FLOAT s[SBLIMIT])
+void twolame_window_filter_subband(subband_mem * smem, short *pBuffer, int ch, FLOAT s[SBLIMIT])
 {
     register int i, j;
     int pa, pb, pc, pd, pe, pf, pg, ph;

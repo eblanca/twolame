@@ -2,7 +2,7 @@
  *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
  *  Copyright (C) 2001-2004 Michael Cheng
- *  Copyright (C) 2004-2017 The TwoLAME Project
+ *  Copyright (C) 2004-2018 The TwoLAME Project
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -31,7 +31,7 @@
 
 
 /*create bit buffer*/
-bit_stream *buffer_init(unsigned char *buffer, int buffer_size)
+bit_stream *twolame_buffer_init(unsigned char *buffer, int buffer_size)
 {
     bit_stream *bs = (bit_stream *) TWOLAME_MALLOC(sizeof(bit_stream));
 
@@ -49,7 +49,7 @@ bit_stream *buffer_init(unsigned char *buffer, int buffer_size)
 }
 
 /* Dellocate bit buffer */
-void buffer_deinit(bit_stream ** bs)
+void twolame_buffer_deinit(bit_stream ** bs)
 {
 
     if (bs == NULL || *bs == NULL)
