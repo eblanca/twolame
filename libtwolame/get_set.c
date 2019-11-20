@@ -2,7 +2,7 @@
  *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
  *  Copyright (C) 2001-2004 Michael Cheng
- *  Copyright (C) 2004-2017 The TwoLAME Project
+ *  Copyright (C) 2004-2018 The TwoLAME Project
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -291,23 +291,6 @@ int twolame_set_VBR_level(twolame_options * glopts, float level)
 }
 
 float twolame_get_VBR_level(twolame_options * glopts)
-{
-    return (float)(glopts->vbrlevel);
-}
-
-// Deprecated:
-int twolame_set_VBR_q(twolame_options * glopts, float level)
-{
-    // Limit is -50 to 50, but useful range is -10 to 10
-    if (fabs(level) > 50.0)
-        return (-1);
-    else
-        glopts->vbrlevel = level;
-    return (0);
-}
-
-// Deprecated:
-float twolame_get_VBR_q(twolame_options * glopts)
 {
     return (float)(glopts->vbrlevel);
 }

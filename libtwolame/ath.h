@@ -2,7 +2,7 @@
  *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
  *  Copyright (C) 2001-2004 Michael Cheng
- *  Copyright (C) 2004-2017 The TwoLAME Project
+ *  Copyright (C) 2004-2018 The TwoLAME Project
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -23,9 +23,9 @@
 #ifndef TWOLAME_ATH_H
 #define TWOLAME_ATH_H
 
-FLOAT ath_db(FLOAT f, FLOAT value);
-FLOAT ath_energy(FLOAT f, FLOAT value);
-FLOAT ath_freq2bark(FLOAT freq);
+FLOAT twolame_ath_db(FLOAT f, FLOAT value);
+FLOAT twolame_ath_energy(FLOAT f, FLOAT value);
+FLOAT twolame_ath_freq2bark(FLOAT freq);
 
 #endif
 

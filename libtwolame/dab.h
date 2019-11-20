@@ -2,7 +2,7 @@
  *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
  *  Copyright (C) 2001-2004 Michael Cheng
- *  Copyright (C) 2004-2017 The TwoLAME Project
+ *  Copyright (C) 2004-2018 The TwoLAME Project
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -24,12 +24,12 @@
 #ifndef TWOLAME_DAB_H
 #define TWOLAME_DAB_H
 
-void dab_crc_calc(twolame_options * glopts,
-                  unsigned int bit_alloc[2][SBLIMIT],
-                  unsigned int scfsi[2][SBLIMIT],
-                  unsigned int scalar[2][3][SBLIMIT], unsigned int *crc, int i);
+void twolame_dab_crc_calc(twolame_options * glopts,
+                          unsigned int bit_alloc[2][SBLIMIT],
+                          unsigned int scfsi[2][SBLIMIT],
+                          unsigned int scalar[2][3][SBLIMIT], unsigned int *crc, int i);
 
-void dab_crc_update(unsigned int, unsigned int, unsigned int *);
+void twolame_dab_crc_update(unsigned int, unsigned int, unsigned int *);
 
 #endif
 

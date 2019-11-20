@@ -2,7 +2,7 @@
  *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
  *  Copyright (C) 2001-2004 Michael Cheng
- *  Copyright (C) 2004-2017 The TwoLAME Project
+ *  Copyright (C) 2004-2018 The TwoLAME Project
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -1261,7 +1261,7 @@ static void atan_table_init(void)
 /* For variations on psycho model 2:
    N always equals 1024
    BUT in the returned values, no energy/phi is used at or above an index of 513 */
-void psycho_2_fft(FLOAT * x_real, FLOAT * energy, FLOAT * phi)
+void twolame_psycho_2_fft(FLOAT * x_real, FLOAT * energy, FLOAT * phi)
 /* got rid of size "N" argument as it is always 1024 for layerII */
 {
     FLOAT imag, real;
@@ -1307,7 +1307,7 @@ void psycho_2_fft(FLOAT * x_real, FLOAT * energy, FLOAT * phi)
 }
 
 
-void psycho_1_fft(FLOAT * x_real, FLOAT * energy, int N)
+void twolame_psycho_1_fft(FLOAT * x_real, FLOAT * energy, int N)
 {
     FLOAT a, b;
     int i, j;

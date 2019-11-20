@@ -2,7 +2,7 @@
  *  TwoLAME: an optimized MPEG Audio Layer Two encoder
  *
  *  Copyright (C) 2001-2004 Michael Cheng
- *  Copyright (C) 2004-2017 The TwoLAME Project
+ *  Copyright (C) 2004-2018 The TwoLAME Project
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -53,7 +53,7 @@ static unsigned int crc_update(unsigned int value, unsigned int crc, unsigned in
  * and then the bits up and until the scale-factor bits.
  */
 
-void crc_writeheader(unsigned char *bitstream, int bit_count)
+void twolame_crc_writeheader(unsigned char *bitstream, int bit_count)
 {
     unsigned int crc = 0xffff;  /* (jo) init crc16 for error_protection */
     int whole_bytes = (bit_count >> 3);
