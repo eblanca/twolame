@@ -42,10 +42,10 @@
 
 static const FLOAT nmt = 5.5;
 
-static const FLOAT crit_band[27] = { 0, 100, 200, 300, 400, 510, 630, 770,
-                                     920, 1080, 1270, 1480, 1720, 2000, 2320, 2700,
-                                     3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000,
-                                     15500, 25000, 30000
+static const FLOAT crit_band[27] = { 0.0, 100.0, 200.0, 300.0, 400.0, 510.0, 630.0, 770.0,
+                                     920.0, 1080.0, 1270.0, 1480.0, 1720.0, 2000.0, 2320.0, 2700.0,
+                                     3150.0, 3700.0, 4400.0, 5300.0, 6400.0, 7700.0, 9500.0, 12000.0,
+                                     15500.0, 25000.0, 30000.0
                                    };
 
 static const FLOAT bmax[27] = { 20.0, 20.0, 20.0, 20.0, 20.0, 17.0, 15.0,
@@ -148,12 +148,12 @@ psycho_2_mem *twolame_psycho_2_init(twolame_options * glopts, int sfreq)
     /* calculate HANN window coefficients */
     /* for(i=0;i<BLKSIZE;i++)window[i]=0.5*(1-cos(2.0*PI*i/(BLKSIZE-1.0))); */
     for (i = 0; i < BLKSIZE; i++)
-        window[i] = 0.5 * (1 - cos(2.0 * PI * ((FLOAT)i - 0.5) / BLKSIZE));
+        window[i] = 0.5 * (1.0 - cos(2.0 * PI * ((FLOAT)i - 0.5) / BLKSIZE));
     /* reset states used in unpredictability measure */
     for (i = 0; i < HBLKSIZE; i++) {
-        mem->r[0][0][i] = mem->r[1][0][i] = mem->r[0][1][i] = mem->r[1][1][i] = 0;
-        mem->phi_sav[0][0][i] = mem->phi_sav[1][0][i] = 0;
-        mem->phi_sav[0][1][i] = mem->phi_sav[1][1][i] = 0;
+        mem->r[0][0][i] = mem->r[1][0][i] = mem->r[0][1][i] = mem->r[1][1][i] = 0.0;
+        mem->phi_sav[0][0][i] = mem->phi_sav[1][0][i] = 0.0;
+        mem->phi_sav[0][1][i] = mem->phi_sav[1][1][i] = 0.0;
         mem->lthr[0][i] = 60802371420160.0;
         mem->lthr[1][i] = 60802371420160.0;
     }
@@ -213,8 +213,8 @@ psycho_2_mem *twolame_psycho_2_init(twolame_options * glopts, int sfreq)
                 ftemp2 = 0.0;
             temp1 += 0.474;
             temp3 = 15.811389 + 7.5 * temp1 - 17.5 * sqrt((FLOAT) (1.0 + temp1 * temp1));
-            if (temp3 <= -100)
-                s[i][j] = 0;
+            if (temp3 <= -100.0)
+                s[i][j] = 0.0;
             else {
                 temp3 = (ftemp2 + temp3) * LN_TO_LOG10;
                 s[i][j] = exp(temp3);
@@ -227,7 +227,7 @@ psycho_2_mem *twolame_psycho_2_init(twolame_options * glopts, int sfreq)
         temp1 = 15.5 + cbval[j];
         tmn[j] = (temp1 > 24.5) ? temp1 : 24.5;
         /* Calculate normalization factors for the net spreading functions */
-        rnorm[j] = 0;
+        rnorm[j] = 0.0;
         for (i = 0; i < CBANDS; i++) {
             rnorm[j] += s[j][i];
         }

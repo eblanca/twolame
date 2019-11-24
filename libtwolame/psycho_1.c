@@ -122,7 +122,7 @@ static void psycho_1_init_add_db(psycho_1_mem * mem)
     FLOAT x;
     for (i = 0; i < DBTAB; i++) {
         x = (FLOAT) i / 10.0;
-        mem->dbtable[i] = 10 * log10(1 + pow(10.0, x / 10.0)) - x;
+        mem->dbtable[i] = 10.0 * log10(1.0 + pow(10.0, x / 10.0)) - x;
     }
 }
 
@@ -175,7 +175,7 @@ static void psycho_1_hann_fft_pickmax(FLOAT sample[FFT_SIZE], mask power[HAN_SIZ
         sqrt_8_over_3 = pow(8.0 / 3.0, 0.5);
         for (i = 0; i < FFT_SIZE; i++) {
             /* Hann window formula */
-            window[i] = sqrt_8_over_3 * 0.5 * (1 - cos(2.0 * PI * (FLOAT)i / (FFT_SIZE))) / FFT_SIZE;
+            window[i] = sqrt_8_over_3 * 0.5 * (1.0 - cos(2.0 * PI * (FLOAT)i / (FFT_SIZE))) / FFT_SIZE;
         }
         init = 1;
     }
@@ -188,7 +188,7 @@ static void psycho_1_hann_fft_pickmax(FLOAT sample[FFT_SIZE], mask power[HAN_SIZ
         if (energy[i] < 1E-20)
             power[i].x = -200.0 + POWERNORM;
         else
-            power[i].x = 10 * log10(energy[i]) + POWERNORM;
+            power[i].x = 10.0 * log10(energy[i]) + POWERNORM;
         power[i].next = STOP;
         power[i].type = FALSE;
     }
@@ -442,14 +442,14 @@ static void psycho_1_threshold(psycho_1_mem * mem, int *tone, int *noise, int bi
             if (dz >= -3.0 && dz < 8.0) {
                 tmps = -1.525 - 0.275 * ltg[power[t].map].bark - 4.5 + power[t].x;
                 /* masking function for lower & upper slopes */
-                if (dz < -1)
-                    vf = 17 * (dz + 1) - (0.4 * power[t].x + 6);
-                else if (dz < 0)
-                    vf = (0.4 * power[t].x + 6) * dz;
-                else if (dz < 1)
-                    vf = (-17 * dz);
+                if (dz < -1.0)
+                    vf = 17.0 * (dz + 1.0) - (0.4 * power[t].x + 6.0);
+                else if (dz < 0.0)
+                    vf = (0.4 * power[t].x + 6.0) * dz;
+                else if (dz < 1.0)
+                    vf = (-17.0 * dz);
                 else
-                    vf = -(dz - 1) * (17 - 0.15 * power[t].x) - 17;
+                    vf = -(dz - 1.0) * (17.0 - 0.15 * power[t].x) - 17.0;
                 ltg[k].x = add_db(mem, ltg[k].x, tmps + vf);
             }
             t = power[t].next;
@@ -461,14 +461,14 @@ static void psycho_1_threshold(psycho_1_mem * mem, int *tone, int *noise, int bi
             if (dz >= -3.0 && dz < 8.0) {
                 tmps = -1.525 - 0.175 * ltg[power[t].map].bark - 0.5 + power[t].x;
                 /* masking function for lower & upper slopes */
-                if (dz < -1)
-                    vf = 17 * (dz + 1) - (0.4 * power[t].x + 6);
-                else if (dz < 0)
-                    vf = (0.4 * power[t].x + 6) * dz;
-                else if (dz < 1)
-                    vf = (-17 * dz);
+                if (dz < -1.0)
+                    vf = 17.0 * (dz + 1.0) - (0.4 * power[t].x + 6.0);
+                else if (dz < 0.0)
+                    vf = (0.4 * power[t].x + 6.0) * dz;
+                else if (dz < 1.0)
+                    vf = (-17.0 * dz);
                 else
-                    vf = -(dz - 1) * (17 - 0.15 * power[t].x) - 17;
+                    vf = -(dz - 1.0) * (17.0 - 0.15 * power[t].x) - 17.0;
                 ltg[k].x = add_db(mem, ltg[k].x, tmps + vf);
             }
             t = power[t].next;
@@ -522,7 +522,7 @@ static void psycho_1_smr(FLOAT ltmin[SBLIMIT], FLOAT spike[SBLIMIT], FLOAT scale
     FLOAT max;
 
     for (i = 0; i < sblimit; i++) { /* determine the signal */
-        max = 20 * log10(scale[i]) - 10;    /* level for each subband */
+        max = 20.0 * log10(scale[i]) - 10.0;    /* level for each subband */
         if (spike[i] > max)
             max = spike[i];     /* for the maximum scale */
         max -= ltmin[i];        /* factors */
@@ -584,7 +584,7 @@ void twolame_psycho_1(twolame_options * glopts, FLOAT bufferF[2][1152], FLOAT sc
         }
         psycho_1_make_map(mem->sub_size, mem->power, mem->ltg);
         for (i = 0; i < 1408; i++)
-            mem->fft_buf[0][i] = mem->fft_buf[1][i] = 0;
+            mem->fft_buf[0][i] = mem->fft_buf[1][i] = 0.0;
 
         psycho_1_init_add_db(mem);  /* create the add_db table */
 

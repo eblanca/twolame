@@ -706,7 +706,7 @@ int main(int argc, char **argv)
     twolame_options *encopts = NULL;
     SNDFILE *inputfile = NULL;
     FILE *outputfile = NULL;
-    short int *pcmaudio = NULL;
+    float *pcmaudio = NULL;
     unsigned int frame_count = 0;
     unsigned int total_samples = 0;
     unsigned int total_frames = 0;
@@ -758,7 +758,7 @@ int main(int argc, char **argv)
 
 
     // Allocate memory for the PCM audio data
-    if ((pcmaudio = (short int *) calloc(AUDIO_BUF_SIZE, sizeof(short int))) == NULL) {
+    if ((pcmaudio = (float *) calloc(AUDIO_BUF_SIZE, sizeof(float))) == NULL) {
         fprintf(stderr, "Error: pcmaudio memory allocation failed\n");
         exit(ERR_MEM_ALLOC);
     }
@@ -779,7 +779,11 @@ int main(int argc, char **argv)
 
 
     // Now do the reading/encoding/writing
-    while ((samples_read = sf_read_short(inputfile, pcmaudio, audioReadSize)) > 0) {
+    /*
+     * NOTE: when building library with double precision floting point,
+     * call 'sf_read_double' instead
+     */
+    while ((samples_read = sf_read_float(inputfile, pcmaudio, audioReadSize)) > 0) {
         int bytes_out = 0;
 
         // Calculate the number of samples we have (per channel)
@@ -790,14 +794,14 @@ int main(int argc, char **argv)
         if (channelswap && sfinfo.channels == 2) {
             int i;
             for (i = 0; i < samples_read; i++) {
-                short tmp = pcmaudio[(2 * i)];
+                float tmp = pcmaudio[(2 * i)];
                 pcmaudio[(2 * i)] = pcmaudio[(2 * i) + 1];
                 pcmaudio[(2 * i) + 1] = tmp;
             }
         }
         // Encode the audio to MP2
         mp2fill_size =
-            twolame_encode_buffer_interleaved(encopts, pcmaudio, samples_read, mp2buffer,
+            twolame_encode_buffer_float_interleaved(encopts, pcmaudio, samples_read, mp2buffer,
                                               MP2_BUF_SIZE);
 
         // Stop if we don't have any bytes (probably don't have enough audio for a full frame of

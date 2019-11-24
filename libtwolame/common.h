@@ -39,13 +39,13 @@
 ****************************************************************************************/
 
 //#ifndef FLOAT
-#if 1
-#define			FLOAT					double
-#else
+//#if 1
+//#define         FLOAT                   double
+//#else
 /* when selecting 'float' as sample type, make sure gcc is run with
    option "-fsingle-precision-constant" which instruct it to promote constant values
    to float data type, not double (as per default) */
-#define			FLOAT					float
+#define         FLOAT                   float
 #define         pow                     powf
 #define         exp                     expf
 #define         atan                    atanf
@@ -57,7 +57,7 @@
 #define         sin                     sinf
 #define         log                     logf
 #define         trunc                   truncf
-#endif
+//#endif
 
 #define            NULL_CHAR                '\0'
 
@@ -68,7 +68,6 @@
 #ifndef E
 #define            E                        2.71828182845
 #endif
-
 #define            PI2                      PI/2
 #define            PI4                      PI/4
 #define            PI64                     PI/64

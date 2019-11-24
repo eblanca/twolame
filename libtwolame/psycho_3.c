@@ -78,7 +78,7 @@ static void psycho_3_fft(FLOAT sample[BLKSIZE], FLOAT energy[BLKSIZE])
     if (!init) {                /* calculate window function for the Fourier transform */
         FLOAT sqrt_8_over_3 = pow(8.0 / 3.0, 0.5);
         for (i = 0; i < BLKSIZE; i++) {
-            window[i] = sqrt_8_over_3 * 0.5 * (1 - cos(2.0 * PI * (FLOAT)i / (BLKSIZE))) / BLKSIZE;
+            window[i] = sqrt_8_over_3 * 0.5 * (1.0 - cos(2.0 * PI * (FLOAT)i / (BLKSIZE))) / BLKSIZE;
         }
         init=1;
     }
@@ -99,7 +99,7 @@ static void psycho_3_powerdensityspectrum(FLOAT energy[BLKSIZE], FLOAT power[HBL
         if (energy[i] < 1E-20)
             power[i] = -200.0 + POWERNORM;
         else
-            power[i] = 10 * log10(energy[i]) + POWERNORM;
+            power[i] = 10.0 * log10(energy[i]) + POWERNORM;
     }
 }
 
@@ -123,7 +123,7 @@ static void psycho_3_spl(FLOAT * Lsb, FLOAT * power, FLOAT * scale)
     /* Compare it to the sound pressure based upon the scale for this subband and pick the maximum
        one */
     for (i = 0; i < SBLIMIT; i++) {
-        FLOAT val = 20 * log10(scale[i] * 32768) - 10;
+        FLOAT val = 20.0 * log10(scale[i] * 32768.0) - 10.0;
         Lsb[i] = MAX(Xmax[i], val);
     }
 }
@@ -203,7 +203,7 @@ static void psycho_3_init_add_db(psycho_3_mem * mem)
     FLOAT x;
     for (i = 0; i < DBTAB; i++) {
         x = (FLOAT) i / 10.0;
-        mem->dbtable[i] = 10 * log10(1 + pow(10.0, x / 10.0)) - x;
+        mem->dbtable[i] = 10.0 * log10(1.0 + pow(10.0, x / 10.0)) - x;
     }
 }
 
@@ -224,8 +224,8 @@ static void psycho_3_noise_label(psycho_3_mem * mem, FLOAT power[HBLKSIZE], FLOA
     for (i = 0; i < cbands; i++) {
         /* for each critical band */
         FLOAT sum = DBMIN;
-        FLOAT esum = 0;
-        FLOAT centreweight = 0;
+        FLOAT esum = 0.0;
+        FLOAT centreweight = 0.0;
         int centre;
         for (j = cbandindex[i]; j < cbandindex[i + 1]; j++) {
             Xnm[j] = DBMIN;
@@ -322,14 +322,14 @@ static void psycho_3_threshold(psycho_3_mem * mem, FLOAT * LTg, int *tonelabel, 
                     FLOAT vf;
                     FLOAT av = -1.525 - 0.275 * bark[k] - 4.5 + Xtm[k];
                     /* masking function for lower & upper slopes */
-                    if (dz < -1)
-                        vf = 17 * (dz + 1) - (0.4 * Xtm[k] + 6);
-                    else if (dz < 0)
-                        vf = (0.4 * Xtm[k] + 6) * dz;
-                    else if (dz < 1)
-                        vf = (-17 * dz);
+                    if (dz < -1.0)
+                        vf = 17.0 * (dz + 1.0) - (0.4 * Xtm[k] + 6.0);
+                    else if (dz < 0.0)
+                        vf = (0.4 * Xtm[k] + 6.0) * dz;
+                    else if (dz < 1.0)
+                        vf = (-17.0 * dz);
                     else
-                        vf = -(dz - 1) * (17 - 0.15 * Xtm[k]) - 17;
+                        vf = -(dz - 1.0) * (17.0 - 0.15 * Xtm[k]) - 17.0;
                     LTtm[j] = psycho_3_add_db(mem, LTtm[j], av + vf);
                 }
             }
@@ -344,14 +344,14 @@ static void psycho_3_threshold(psycho_3_mem * mem, FLOAT * LTg, int *tonelabel, 
                     FLOAT vf;
                     FLOAT av = -1.525 - 0.175 * bark[k] - 0.5 + Xnm[k];
                     /* masking function for lower & upper slopes */
-                    if (dz < -1)
-                        vf = 17 * (dz + 1) - (0.4 * Xnm[k] + 6);
-                    else if (dz < 0)
-                        vf = (0.4 * Xnm[k] + 6) * dz;
-                    else if (dz < 1)
-                        vf = (-17 * dz);
+                    if (dz < -1.0)
+                        vf = 17.0 * (dz + 1.0) - (0.4 * Xnm[k] + 6.0);
+                    else if (dz < 0.0)
+                        vf = (0.4 * Xnm[k] + 6.0) * dz;
+                    else if (dz < 1.0)
+                        vf = (-17.0 * dz);
                     else
-                        vf = -(dz - 1) * (17 - 0.15 * Xnm[k]) - 17;
+                        vf = -(dz - 1.0) * (17.0 - 0.15 * Xnm[k]) - 17.0;
                     LTnm[j] = psycho_3_add_db(mem, LTnm[j], av + vf);
                 }
             }
@@ -463,7 +463,7 @@ static psycho_3_mem *twolame_psycho_3_init(twolame_options * glopts)
             if (numlines[i] != 0)
                 cbval[i] /= (FLOAT)numlines[i];    /* divide by the number of values */
             else {
-                cbval[i] = 0;   /* this isn't a partition */
+                cbval[i] = 0.0;   /* this isn't a partition */
             }
         }
     }

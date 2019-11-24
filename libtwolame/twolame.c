@@ -516,7 +516,7 @@ static int encode_frame(twolame_options * glopts, bit_stream * bs)
 
     /* allow the user to reserve some space at the end of the frame This will however leave fewer
        bits for the audio. Need to do a sanity check here to see that there are *some* bits left. */
-    if (glopts->num_ancillary_bits > 0.6 * adb) {
+    if (glopts->num_ancillary_bits > ((6 * adb) / 10)) {
         /* Trying to reserve more than 60% of the frame. 0.6 is arbitrary. but since most
            applications probably only want to reserve a few bytes, this seems fine. Typical frame
            size is about 800bytes */
@@ -703,12 +703,12 @@ int twolame_encode_buffer(twolame_options * glopts,
             /* Copy across samples */
             if (glopts->num_channels_in == 2)
                 for (i = 0; i < samples_to_copy; i++) {
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = *leftpcm++;
-                    glopts->bufferF[1][glopts->samples_in_buffer + i] = *rightpcm++;
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)*leftpcm++;
+                    glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)*rightpcm++;
                 }
             else
                 for (i = 0; i < samples_to_copy; i++)
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = *leftpcm++;
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)*leftpcm++;
 
 
             /* Update sample counts */
@@ -764,12 +764,12 @@ int twolame_encode_buffer_interleaved(twolame_options * glopts,
             /* Copy across samples */
             if (glopts->num_channels_in == 2)
                 for (i = 0; i < samples_to_copy; i++) {
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = *pcm++;
-                    glopts->bufferF[1][glopts->samples_in_buffer + i] = *pcm++;
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
+                    glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
                 }
             else
                 for (i = 0; i < samples_to_copy; i++)
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = *pcm++;
+                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
 
 
             /* Update sample counts */
@@ -826,7 +826,7 @@ static void float32_to_short(const float in[], short out[], int num_samples, int
   mp2fill_size - how much mpeg data the library has put into the mp2buffer
 */
 
-int twolame_encode_buffer_float32(twolame_options * glopts,
+int twolame_encode_buffer_float(twolame_options * glopts,
                                   const float leftpcm[],
                                   const float rightpcm[],
                                   int num_samples, unsigned char *mp2buffer, int mp2buffer_size)
@@ -887,7 +887,7 @@ int twolame_encode_buffer_float32(twolame_options * glopts,
 }
 
 
-int twolame_encode_buffer_float32_interleaved(twolame_options * glopts,
+int twolame_encode_buffer_float_interleaved(twolame_options * glopts,
         const float pcm[],
         int num_samples,
         unsigned char *mp2buffer, int mp2buffer_size)

@@ -206,7 +206,7 @@ static psycho_4_mem *twolame_psycho_4_init(twolame_options * glopts, int sfreq)
 
     /* calculate HANN window coefficients */
     for (i = 0; i < BLKSIZE; i++)
-        window[i] = 0.5 * (1 - cos(2.0 * PI * ((FLOAT)i - 0.5) / BLKSIZE));
+        window[i] = 0.5 * (1.0 - cos(2.0 * PI * ((FLOAT)i - 0.5) / BLKSIZE));
 
     /* For each FFT line from 0(DC) to 512(Nyquist) calculate - bark : the bark value of this fft
        line - ath : the absolute threshold of hearing for this line [ATH]
@@ -254,7 +254,7 @@ static psycho_4_mem *twolame_psycho_4_init(twolame_options * glopts, int sfreq)
         if (numlines[i] != 0)
             cbval[i] /= (FLOAT)numlines[i];    /* divide by the number of values */
         else {
-            cbval[i] = 0;       /* this isn't a partition */
+            cbval[i] = 0.0;       /* this isn't a partition */
         }
     }
 
@@ -460,18 +460,18 @@ void twolame_psycho_4(twolame_options * glopts,
             /* convolve the grouped energy-weighted unpredictability measure and the grouped energy
                with the spreading function ISO 11172 D.2.4.f */
             for (j = 0; j < CBANDS; j++) {
-                ecb[j] = 0;
-                cb[j] = 0;
+                ecb[j] = 0.0;
+                cb[j] = 0.0;
                 for (k = 0; k < CBANDS; k++) {
                     if (s[j][k] != 0.0) {
                         ecb[j] += s[j][k] * grouped_e[k];
                         cb[j] += s[j][k] * grouped_c[k];
                     }
                 }
-                if (ecb[j] != 0)
+                if (ecb[j] != 0.0)
                     cb[j] = cb[j] / ecb[j];
                 else
-                    cb[j] = 0;
+                    cb[j] = 0.0;
             }
 
             /* Convert cb to tb (the tonality index) ISO11172 SecD.2.4.g */
@@ -500,7 +500,7 @@ void twolame_psycho_4(twolame_options * glopts,
                 if (rnorm[j] && numlines[j])
                     nb[j] = ecb[j] * bc[j] / (rnorm[j] * (FLOAT)numlines[j]);
                 else
-                    nb[j] = 0;
+                    nb[j] = 0.0;
             }
 
             /* ISO11172 Sec D.2.4.l - thr[] the final energy threshold of audibility */
