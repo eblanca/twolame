@@ -295,7 +295,7 @@ static psycho_4_mem *twolame_psycho_4_init(twolame_options * glopts, int sfreq)
 
 
 void twolame_psycho_4(twolame_options * glopts,
-                      FLOAT bufferF[2][1152], FLOAT savebufF[2][1056], FLOAT smr[2][32])
+                      FLOAT buffer[2][1152], FLOAT savebuf[2][1056], FLOAT smr[2][32])
 /* to match prototype : FLOAT args are always FLOAT */
 {
     psycho_4_mem *mem;
@@ -363,17 +363,17 @@ void twolame_psycho_4(twolame_options * glopts,
                flush = 384*3.0/2.0; = 576 syncsize = 1056; sync_flush = syncsize - flush; 480
                BLKSIZE = 1024 */
             {
-                FLOAT *bufferp = bufferF[ch];
+                FLOAT *bufferp = buffer[ch];
                 for (j = 0; j < 480; j++) {
-                    savebufF[ch][j] = savebufF[ch][j + 576];
-                    wsamp_r[j] = window[j] * ((FLOAT) savebufF[ch][j]);
+                    savebuf[ch][j] = savebuf[ch][j + 576];
+                    wsamp_r[j] = window[j] * ((FLOAT) savebuf[ch][j]);
                 }
                 for (; j < 1024; j++) {
-                    savebufF[ch][j] = *bufferp++;
-                    wsamp_r[j] = window[j] * ((FLOAT) savebufF[ch][j]);
+                    savebuf[ch][j] = *bufferp++;
+                    wsamp_r[j] = window[j] * ((FLOAT) savebuf[ch][j]);
                 }
                 for (; j < 1056; j++)
-                    savebufF[ch][j] = *bufferp++;
+                    savebuf[ch][j] = *bufferp++;
             }
 
             /* Compute FFT */

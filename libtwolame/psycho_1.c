@@ -195,7 +195,8 @@ static void psycho_1_hann_fft_pickmax(FLOAT sample[FFT_SIZE], mask power[HAN_SIZ
 
     /* Calculate the sum of spectral component in each subband from bound 4-16 */
 
-#define CF 1073741824           /* pow(10, 0.1*POWERNORM) */
+//#define CF 1073741824           /* pow(10, 0.1*POWERNORM) */
+#define CF          1           /* pow(10, 0.1*POWERNORM) */
 #define DBM     1E-20              /* pow(10.0, 0.1*DBMIN */
     for (i = 0; i < HAN_SIZE; spike[i >> 4] = 10.0 * log10(sum), i += 16) {
         for (j = 0, sum = DBM; j < 16; j++)
@@ -554,7 +555,7 @@ static void psycho_1_dump(mask power[HAN_SIZE], int *tone, int *noise) {
 */
 
 
-void twolame_psycho_1(twolame_options * glopts, FLOAT bufferF[2][1152], FLOAT scale[2][SBLIMIT],
+void twolame_psycho_1(twolame_options * glopts, FLOAT buffer[2][1152], FLOAT scale[2][SBLIMIT],
                       FLOAT ltmin[2][SBLIMIT])
 {
     psycho_1_mem *mem;
@@ -606,7 +607,7 @@ void twolame_psycho_1(twolame_options * glopts, FLOAT bufferF[2][1152], FLOAT sc
         /* sami's speedup, added in 02j saves about 4% overall during an encode */
         int ok = mem->off[k] % 1408;
         for (i = 0; i < 1152; i++) {
-            fft_buf[k][ok++] = (FLOAT) bufferF[k][i] / SCALE;
+            fft_buf[k][ok++] = (FLOAT) buffer[k][i] / SCALE;
             if (ok >= 1408)
                 ok = 0;
         }

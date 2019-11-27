@@ -866,7 +866,7 @@ int twolame_init_bit_allocation(twolame_options * glopts)
        by vbr_bits_for_nonoise) */
     for (brindex = glopts->lower_index; brindex <= glopts->upper_index; brindex++) {
         glopts->bitrateindextobits[brindex] =
-            (int) (1152.0 / ((FLOAT)glopts->samplerate_out / 1000.0) * (FLOAT) twolame_index_bitrate((int)glopts->version, brindex));
+            (int) ((FLOAT)TWOLAME_SAMPLES_PER_FRAME / ((FLOAT)glopts->samplerate_out / 1000.0) * (FLOAT) twolame_index_bitrate((int)glopts->version, brindex));
     }
 
     return 0;

@@ -107,7 +107,8 @@
 #define DBMIN           -200.0
 #define LAST            -1
 #define STOP            -100
-#define POWERNORM       90.3090 /* = 20 * log10(32768) to normalize */
+//#define POWERNORM       90.3090 /* = 20 * log10(32768) to normalize */
+#define POWERNORM        0.0    /* = 20 * log10(1.0) to normalize */
 /* max output power to 96 dB per spec */
 
 

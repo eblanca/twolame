@@ -123,7 +123,7 @@ static void psycho_3_spl(FLOAT * Lsb, FLOAT * power, FLOAT * scale)
     /* Compare it to the sound pressure based upon the scale for this subband and pick the maximum
        one */
     for (i = 0; i < SBLIMIT; i++) {
-        FLOAT val = 20.0 * log10(scale[i] * 32768.0) - 10.0;
+        FLOAT val = 20.0 * log10(scale[i]) - 10.0;
         Lsb[i] = MAX(Xmax[i], val);
     }
 }
@@ -521,7 +521,7 @@ static void psycho_3_dump(int *tonelabel, FLOAT * Xtm, int *noiselabel, FLOAT * 
 }
 
 
-void twolame_psycho_3(twolame_options * glopts, FLOAT bufferF[2][1152], FLOAT scale[2][32],
+void twolame_psycho_3(twolame_options * glopts, FLOAT buffer[2][1152], FLOAT scale[2][32],
                       FLOAT ltmin[2][32])
 {
     psycho_3_mem *mem;
@@ -544,7 +544,7 @@ void twolame_psycho_3(twolame_options * glopts, FLOAT bufferF[2][1152], FLOAT sc
     for (k = 0; k < nch; k++) {
         int ok = mem->off[k] % 1408;
         for (i = 0; i < 1152; i++) {
-            mem->fft_buf[k][ok++] = (FLOAT) bufferF[k][i] / SCALE;
+            mem->fft_buf[k][ok++] = (FLOAT) buffer[k][i] / SCALE;
             if (ok >= 1408)
                 ok = 0;
         }
