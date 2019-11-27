@@ -411,7 +411,7 @@ int twolame_init_params(twolame_options * glopts)
     }
 
     // clear buffers
-    memset((char *) glopts->bufferF, 0, sizeof(glopts->bufferF));
+    memset((char *) glopts->buffer, 0, sizeof(glopts->buffer));
     memset((char *) glopts->bit_alloc, 0, sizeof(glopts->bit_alloc));
     memset((char *) glopts->scfsi, 0, sizeof(glopts->scfsi));
     memset((char *) glopts->scalar, 0, sizeof(glopts->scalar));
@@ -444,36 +444,36 @@ static void scale_and_mix_samples(twolame_options * glopts)
     if (glopts->scale != 0 && glopts->scale != 1.0) {
         if (glopts->num_channels_in == 2)
             for (i = 0; i < num_samples; ++i) {
-                glopts->bufferF[0][i] *= glopts->scale;
-                glopts->bufferF[1][i] *= glopts->scale;
+                glopts->buffer[0][i] *= glopts->scale;
+                glopts->buffer[1][i] *= glopts->scale;
             }
         else
             for (i = 0; i < num_samples; ++i)
-                glopts->bufferF[0][i] *= glopts->scale;
+                glopts->buffer[0][i] *= glopts->scale;
     }
     // apply scaling to channel 0 (left)
     if (glopts->scale_left != 0 && glopts->scale_left != 1.0) {
         for (i = 0; i < num_samples; ++i) {
-            glopts->bufferF[0][i] *= glopts->scale_left;
+            glopts->buffer[0][i] *= glopts->scale_left;
         }
     }
     // apply scaling to channel 1 (right)
     if (glopts->scale_right != 0 && glopts->scale_right != 1.0) {
         for (i = 0; i < num_samples; ++i) {
-            glopts->bufferF[1][i] *= glopts->scale_right;
+            glopts->buffer[1][i] *= glopts->scale_right;
         }
     }
     // Downmix to Mono if 2 channels in and 1 channel out
     if (glopts->num_channels_in == 2 && glopts->num_channels_out == 1) {
         for (i = 0; i < num_samples; ++i) {
-            glopts->bufferF[0][i] = (glopts->bufferF[0][i] + glopts->bufferF[1][i]) / 2.0;
-            glopts->bufferF[1][i] = 0;
+            glopts->buffer[0][i] = (glopts->buffer[0][i] + glopts->buffer[1][i]) / 2.0;
+            glopts->buffer[1][i] = 0;
         }
     }
     // Upmix to Stereo if 2 channels out and 1 channel in
     if (glopts->num_channels_in == 1 && glopts->num_channels_out == 2) {
         for (i = 0; i < num_samples; ++i) {
-            glopts->bufferF[1][i] = glopts->bufferF[0][i];
+            glopts->buffer[1][i] = glopts->buffer[0][i];
         }
     }
 
@@ -539,7 +539,7 @@ static int encode_frame(twolame_options * glopts, bit_stream * bs)
             for (bl = 0; bl < 12; bl++)
                 for (ch = 0; ch < nch; ch++)
                     twolame_window_filter_subband(&glopts->smem,
-                                                  &glopts->bufferF[ch][gr * 12 * 32 + 32 * bl], ch,
+                                                  &glopts->buffer[ch][gr * 12 * 32 + 32 * bl], ch,
                                                   &(*glopts->sb_sample)[ch][gr][bl][0]);
     }
 
@@ -569,18 +569,18 @@ static int encode_frame(twolame_options * glopts, bit_stream * bs)
             twolame_psycho_0(glopts, glopts->smr, glopts->scalar);
             break;
         case 1:
-            twolame_psycho_1(glopts, glopts->bufferF, glopts->max_sc, glopts->smr);
+            twolame_psycho_1(glopts, glopts->buffer, glopts->max_sc, glopts->smr);
             break;
         case 2:
-            twolame_psycho_2(glopts, glopts->bufferF, sam, glopts->smr);
+            twolame_psycho_2(glopts, glopts->buffer, sam, glopts->smr);
             break;
         case 3:
             // Modified psy model 1
-            twolame_psycho_3(glopts, glopts->bufferF, glopts->max_sc, glopts->smr);
+            twolame_psycho_3(glopts, glopts->buffer, glopts->max_sc, glopts->smr);
             break;
         case 4:
             // Modified psy model 2
-            twolame_psycho_4(glopts, glopts->bufferF, sam, glopts->smr);
+            twolame_psycho_4(glopts, glopts->buffer, sam, glopts->smr);
             break;
         default:
             fprintf(stderr, "Invalid psy model specification: %i\n", glopts->psymodel);
@@ -703,12 +703,12 @@ int twolame_encode_buffer(twolame_options * glopts,
             /* Copy across samples */
             if (glopts->num_channels_in == 2)
                 for (i = 0; i < samples_to_copy; i++) {
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)*leftpcm++;
-                    glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)*rightpcm++;
+                    glopts->buffer[0][glopts->samples_in_buffer + i] = (FLOAT)*leftpcm++;
+                    glopts->buffer[1][glopts->samples_in_buffer + i] = (FLOAT)*rightpcm++;
                 }
             else
                 for (i = 0; i < samples_to_copy; i++)
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)*leftpcm++;
+                    glopts->buffer[0][glopts->samples_in_buffer + i] = (FLOAT)*leftpcm++;
 
 
             /* Update sample counts */
@@ -764,12 +764,12 @@ int twolame_encode_buffer_interleaved(twolame_options * glopts,
             /* Copy across samples */
             if (glopts->num_channels_in == 2)
                 for (i = 0; i < samples_to_copy; i++) {
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
-                    glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
+                    glopts->buffer[0][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
+                    glopts->buffer[1][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
                 }
             else
                 for (i = 0; i < samples_to_copy; i++)
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
+                    glopts->buffer[0][glopts->samples_in_buffer + i] = (FLOAT)*pcm++;
 
 
             /* Update sample counts */
@@ -854,12 +854,12 @@ int twolame_encode_buffer_float(twolame_options * glopts,
             /* Copy across samples */
             if (glopts->num_channels_in == 2) {
                 for (i=0; i<samples_to_copy; i++) {
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
-                    glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*rightpcm++);
+                    glopts->buffer[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
+                    glopts->buffer[1][glopts->samples_in_buffer + i] = (FLOAT)(*rightpcm++);
                 }
             } else {
                 for (i=0; i<samples_to_copy; i++)
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
+                    glopts->buffer[0][glopts->samples_in_buffer + i] = (FLOAT)(*leftpcm++);
             }
 
             /* Update sample counts */
@@ -915,12 +915,12 @@ int twolame_encode_buffer_float_interleaved(twolame_options * glopts,
             /* Copy across samples */
             if (glopts->num_channels_in == 2) {
                 for(i=0; i<samples_to_copy; i++) {
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
-                    glopts->bufferF[1][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
+                    glopts->buffer[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
+                    glopts->buffer[1][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
                 }
             } else {
                 for(i=0; i<samples_to_copy; i++)
-                    glopts->bufferF[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
+                    glopts->buffer[0][glopts->samples_in_buffer + i] = (FLOAT)(*pcm++);
             }
 
 
@@ -966,7 +966,7 @@ int twolame_encode_flush(twolame_options * glopts, unsigned char *mp2buffer, int
     if (mybs != NULL) {
         // Pad out the PCM buffers with 0 and encode the frame
         for (i = glopts->samples_in_buffer; i < TWOLAME_SAMPLES_PER_FRAME; i++) {
-            glopts->bufferF[0][i] = glopts->bufferF[1][i] = 0.0;
+            glopts->buffer[0][i] = glopts->buffer[1][i] = 0.0;
         }
 
         // Encode the frame

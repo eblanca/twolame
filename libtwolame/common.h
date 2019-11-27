@@ -344,7 +344,7 @@ struct twolame_options_struct {
 
     // Used by twolame_encode_frame
     int twolame_init;
-    FLOAT bufferF[2][TWOLAME_SAMPLES_PER_FRAME]; // Sample buffer
+    FLOAT buffer[2][TWOLAME_SAMPLES_PER_FRAME]; // Sample buffer
     unsigned int samples_in_buffer; // Number of samples currently in buffer
     unsigned int psycount;
     unsigned int num_crc_bits;  // Number of bits CRC is calculated on

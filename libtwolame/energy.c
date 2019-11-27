@@ -65,8 +65,8 @@ void twolame_do_energy_levels(twolame_options * glopts, bit_stream * bs)
        The last 5 bytes *must* be reserved for this to work correctly (otherwise you'll be
        overwriting mpeg audio data) */
 
-    FLOAT *leftpcm = glopts->bufferF[0];
-    FLOAT *rightpcm = glopts->bufferF[1];
+    FLOAT *leftpcm = glopts->buffer[0];
+    FLOAT *rightpcm = glopts->buffer[1];
 
     int i;
     FLOAT leftMax, rightMax;
