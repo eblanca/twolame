@@ -123,7 +123,7 @@ static void psycho_3_spl(FLOAT * Lsb, FLOAT * power, FLOAT * scale)
     /* Compare it to the sound pressure based upon the scale for this subband and pick the maximum
        one */
     for (i = 0; i < SBLIMIT; i++) {
-        FLOAT val = 20.0 * log10(scale[i]) - 10.0;
+        FLOAT val = 20.0 * log10(scale[i] * SCALE) - 10.0;
         Lsb[i] = MAX(Xmax[i], val);
     }
 }

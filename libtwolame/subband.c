@@ -57,7 +57,7 @@ int twolame_init_subband(subband_mem * smem)
 }
 
 
-void twolame_window_filter_subband(subband_mem * smem, FLOAT *pBufferF, int ch, FLOAT s[SBLIMIT])
+void twolame_window_filter_subband(subband_mem * smem, FLOAT *pBuffer, int ch, FLOAT s[SBLIMIT])
 {
     register int i, j;
     int pa, pb, pc, pd, pe, pf, pg, ph;
@@ -71,7 +71,7 @@ void twolame_window_filter_subband(subband_mem * smem, FLOAT *pBufferF, int ch, 
 
     /* replace 32 oldest samples with 32 new samples */
     for (i = 0; i < 32; i++)
-        dp[(31 - i) * 8] = (FLOAT) pBufferF[i] / SCALE;
+        dp[(31 - i) * 8] = (FLOAT) pBuffer[i] / SCALE;
 
     // looks like "school example" but does faster ...
     dp = (smem->x[ch] + smem->half[ch] * 256);

@@ -523,7 +523,7 @@ static void psycho_1_smr(FLOAT ltmin[SBLIMIT], FLOAT spike[SBLIMIT], FLOAT scale
     FLOAT max;
 
     for (i = 0; i < sblimit; i++) { /* determine the signal */
-        max = 20.0 * log10(scale[i]) - 10.0;    /* level for each subband */
+        max = 20.0 * log10(scale[i] * SCALE) - 10.0;    /* level for each subband */
         if (spike[i] > max)
             max = spike[i];     /* for the maximum scale */
         max -= ltmin[i];        /* factors */

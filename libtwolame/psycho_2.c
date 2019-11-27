@@ -326,17 +326,17 @@ void twolame_psycho_2(twolame_options * glopts, FLOAT buffer[2][1152],
                  BLKSIZE = 1024
              *****************************************************************************/
             {
-                FLOAT *bufferpF = buffer[ch];
+                FLOAT *bufferp = buffer[ch];
                 for (j = 0; j < 480; j++) {
                     savebuf[ch][j] = savebuf[ch][j + mem->flush];
                     wsamp_r[j] = window[j] * ((FLOAT) savebuf[ch][j]);
                 }
                 for (; j < 1024; j++) {
-                    savebuf[ch][j] = *bufferpF++;
+                    savebuf[ch][j] = *bufferp++;
                     wsamp_r[j] = window[j] * ((FLOAT) savebuf[ch][j]);
                 }
                 for (; j < 1056; j++)
-                    savebuf[ch][j] = *bufferpF++;
+                    savebuf[ch][j] = *bufferp++;
             }
 
             /**Compute FFT****************************************************************/
